@@ -1,0 +1,37 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon --exec ./node_modules/.bin/ts-node -- --experimental-modules ./index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/koa": "2.0.43",
+    "@types/koa-router": "7.0.27",
+    "@types/koa-send": "4.1.0",
+    "@types/node": "8.5.2",
+    "@types/ramda": "0.25.9",
+    "eslint": "4.14.0",
+    "nodemon": "1.14.3",
+    "prettier": "1.9.2",
+    "ts-node": "4.1.0",
+    "typescript": "2.6.2",
+    "typescript-eslint-parser": "11.0.0"
+  },
+  "dependencies": {
+    "hogan.js": "3.0.2",
+    "koa": "2.4.1",
+    "koa-body": "2.5.0",
+    "koa-router": "7.3.0",
+    "koa-send": "4.1.2",
+    "ramda": "0.25.0"
+  },
+  "prettier": {
+    "trailingComma": "all"
+  }
+}
