@@ -6,36 +6,63 @@ _A weeb framework. For quickly building ambitious weeb applications._
 
 ### features
 
-- Templates
-- Mails
-- Background Jobs
-- Cron Jobs
-- Routing
-- Middewares
-- Pluggable Providers
+**there**
+
+- Authentication
 - Controllers
 - DI / IOC Container
-- Sessions
-- Validation
-- Cache
 - Database CRUD
 - Database Querying
-- Database Migrations
-- Logging
 - Encryption
-- Security
-- Authentication
-- File Storage
-- Test Helpers
-- Deployment
-- Subscriptions Billing
 - I18n
+- Logging
+- Mails
+- Middewares
+- Pluggable Providers
+- Routing
+- Templates
+- Validation
+
+**upcomming**
+
+- Background Jobs
+- Cache
+- Cron Jobs
+- Database Migrations
+- Deployment
+- File Storage
+- Security
+- Sessions
+- Subscriptions Billing
+- Test Helpers
 
 ### usage
 
 ### concepts
 
+Everything is in the DI container, everything is a provider, everything
+is optional / pluggable.
+
 ### starting a new project
+
+```
+npm init --yes
+npm install --save weeb
+```
+
+Create an `index.js` file with:
+
+```js
+const { bootstrap, Container } = require('weeb');
+const container = new Container();
+bootstrap(container, [
+  "./app"
+]);
+
+const app = container.get("app");
+
+app.start();
+```
 
 ### license
 
