@@ -406,7 +406,7 @@ class Request {
     this.container = container;
     this.request = request;
 
-    this.url = request.url;
+    this.url = url.parse(request.url);
     this.method = request.method;
     this.params = {}; // Filled in by router
   }
@@ -427,6 +427,7 @@ class Response {
     if (!statusCode || typeof statusCode !== "number") {
       throw new Error("Missing statusCode, given: " + statusCode);
     }
+    this.statusCode = statusCode;
 
     const res = this.response;
     if (typeof value === "string") {
@@ -510,7 +511,7 @@ class Router {
 
     for (let i = 0; i < routes.length; i++) {
       const route = routes[i];
-      const result = new RegExp(route.path.replace(paramRe, "([^/]+)")).exec(request.url);
+      const result = new RegExp(route.path.replace(paramRe, "([^/]+)")).exec(request.url.pathname);
       if (result) {
         const paramValues = result.slice(1);
         for (let i = 0; i < route.paramNames.length; i++) {
@@ -539,9 +540,12 @@ class Server {
   handle(req, res) {
     const request = new Request(this.container, req);
     const response = new Response(this.container, res);
+    const startMs = Date.now();
     Promise.resolve().then(() => this.handlerFunc(
       request, response,
-    )).catch(err => {
+    )).then(() => {
+      console.log(request.method, response.statusCode, request.url.path, (Date.now()-startMs) + 'ms');
+    }).catch(err => {
       console.log("weeb:", err.stack);
       // TODO custom error handler
       response.text(500, "Internal Server Error");
@@ -593,7 +597,7 @@ class Application {
     const cacheFiles = this.config.get("production");
     const fs = new FileSystem(cacheFiles);
     const folders = this.config.get("staticFolders");
-    const filePathName = url.parse(req.url).pathname.slice("/static".length);
+    const filePathName = req.url.pathname.slice("/static".length).replace('..', '');
     let filePath = await fs.findInDirectories(filePathName, folders);
     if (!filePath) {
       res.text(404, "File not found");
