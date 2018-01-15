@@ -15,7 +15,14 @@
     "test": "node test.js"
   },
   "repository": "kiasaki/weeb",
-  "keywords": ["web", "framework", "templates", "database", "cache", "background job"],
+  "keywords": [
+    "web",
+    "framework",
+    "templates",
+    "database",
+    "cache",
+    "background job"
+  ],
   "author": "weeb authors",
   "license": "MIT",
   "devDependencies": {
