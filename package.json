@@ -1,7 +1,7 @@
 {
   "name": "weeb",
   "version": "1.0.0",
-  "description": "Web Framework",
+  "description": "A weeb framework. For quickly building ambitious weeb applications.",
   "main": "./lib.js",
   "files": [
     "bin",

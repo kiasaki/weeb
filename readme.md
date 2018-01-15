@@ -53,15 +53,17 @@ npm install --save weeb
 Create an `index.js` file with:
 
 ```js
-const { bootstrap, Container } = require('weeb');
-const container = new Container();
-bootstrap(container, [
-  "./app"
-]);
+const { Application } = require("weeb");
 
-const app = container.get("app");
-
+const app = new Application();
+app.addApplication("app", __dirname + "/app");
 app.start();
+```
+
+Start the web server by running:
+
+```
+node index.js
 ```
 
 ### license
