@@ -30,6 +30,7 @@
     "prettier": "1.9.2"
   },
   "dependencies": {
+    "pg": "7.4.1",
     "ramda": "0.25.0"
   },
   "prettier": {
