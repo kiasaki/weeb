@@ -1,4 +1,4 @@
-package main
+package weeb
 
 import (
 	"crypto/rand"

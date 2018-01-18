@@ -1,4 +1,4 @@
-package main
+package weeb
 
 import (
 	"context"
@@ -53,7 +53,7 @@ func setupRouter(app *App) {
 	app.Router = mux.NewRouter()
 
 	app.Router.Use(handlers.RecoveryHandler(handlers.RecoveryLogger(app.Log)))
-	app.Router.Use(loggingMiddleware)
+	app.Router.Use(app.loggingMiddleware)
 
 	staticFilesHandler := http.StripPrefix("/static/", http.FileServer(http.Dir("static")))
 	app.Router.PathPrefix("/static/").Handler(staticFilesHandler)
@@ -61,7 +61,7 @@ func setupRouter(app *App) {
 
 // Start starts the application
 func (app *App) Start() {
-	port := app.Config.Get("port", "8101")
+	port := app.Config.Get("port", "3000")
 	server := &http.Server{
 		Addr:         "0.0.0.0:" + port,
 		WriteTimeout: time.Second * 15,

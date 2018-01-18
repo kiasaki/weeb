@@ -1,4 +1,4 @@
-package main
+package weeb
 
 import (
 	"net/http"
@@ -17,15 +17,15 @@ func (w *responseWriterWithStatus) WriteHeader(code int) {
 }
 func (w *responseWriterWithStatus) Status() int { return w.code }
 
-func loggingMiddleware(h http.Handler) http.Handler {
+func (app *App) loggingMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		wWithStatus := &responseWriterWithStatus{w, 0}
 		start := time.Now()
 		h.ServeHTTP(wWithStatus, r)
-		log.WithFields(log.Fields{
+		app.Log.Info(r.URL.Path, L{
 			"method": r.Method,
 			"code":   wWithStatus.Status(),
 			"ms":     time.Now().Unix() - start.Unix(),
-		}).Info(r.URL.Path)
+		})
 	})
 }

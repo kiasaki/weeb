@@ -1,4 +1,4 @@
-package main
+package weeb
 
 import (
 	"encoding/json"
@@ -75,7 +75,7 @@ func (l *Logger) Log(level, msg string, extra L) {
 	message["msg"] = msg
 	message["time"] = time.Now().Format(time.RFC3339)
 	message["level"] = level
-	messageString := l.formatter(message)
+	messageString := l.formatter(message) + "\n"
 	for _, output := range l.outputs {
 		output(messageString)
 	}

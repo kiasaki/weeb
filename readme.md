@@ -46,24 +46,42 @@ is optional / pluggable.
 ### starting a new project
 
 ```
-npm init --yes
-npm install --save weeb
+go get github.com/kiasaki/weeb
 ```
 
-Create an `index.js` file with:
+Create an `main.go` file with:
 
 ```js
-const { Application } = require("weeb");
+package main
 
-const app = new Application();
-app.addApplication("app", __dirname + "/app");
-app.start();
+import (
+	"net/http"
+
+	"github.com/kiasaki/weeb"
+)
+
+type App struct {
+	*weeb.App
+}
+
+func main() {
+	app := &App{weeb.NewApp()}
+	app.Router.HandleFunc("/", app.handleHome)
+	app.Start()
+}
+
+func (app *App) handleHome(w http.ResponseWriter, r *http.Request) {
+	app.SendJSON(w, 200, weeb.J{
+		"message": "Hello World!",
+	})
+}
 ```
 
 Start the web server by running:
 
 ```
-node index.js
+$ go run main.go
+{"time": "2017-01-01T00:00:00.000Z", "level": "info", "msg": "starting", "port": "3000"}
 ```
 
 ### license
