@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"time"
+
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // L is a shorthand type for log message fields and context
@@ -73,7 +76,7 @@ func (l *Logger) Log(level, msg string, extra L) {
 		message[k] = v
 	}
 	message["msg"] = msg
-	message["time"] = time.Now().Format(time.RFC3339)
+	message["time"] = time.Now().UTC().Format(time.RFC3339)
 	message["level"] = level
 	messageString := l.formatter(message) + "\n"
 	for _, output := range l.outputs {
@@ -121,5 +124,29 @@ func defaultLogFormatter(message L) string {
 }
 
 func defaultLogOutput(message string) {
-	os.Stdout.Write([]byte(message))
+	if terminal.IsTerminal(int(os.Stdout.Fd())) && message[0] == '{' && message[len(message)-2] == '}' {
+		prettyLogOutput(message)
+	} else {
+		fmt.Print(message)
+	}
+}
+
+func prettyLogOutput(message string) {
+
+	value := L{}
+	if err := json.Unmarshal([]byte(message), &value); err != nil {
+		panic(err)
+	}
+
+	level := strings.ToUpper(value["level"].(string))
+	fmt.Printf("%v %v %v ", value["time"], level, value["msg"])
+
+	delete(value, "time")
+	delete(value, "level")
+	delete(value, "msg")
+	args, err := json.Marshal(&value)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(args))
 }

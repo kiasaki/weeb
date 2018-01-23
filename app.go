@@ -17,6 +17,8 @@ type App struct {
 	Cache  Cache
 	Config *Config
 	Router *mux.Router
+	DB     DB
+	Tasks  *Tasks
 }
 
 // NewApp create a new App instance
@@ -27,6 +29,8 @@ func NewApp() *App {
 	setupLog(app)
 	setupCache(app)
 	setupRouter(app)
+	setupDatabase(app)
+	setupTasks(app)
 
 	return app
 }
@@ -59,6 +63,20 @@ func setupRouter(app *App) {
 	app.Router.PathPrefix("/static/").Handler(staticFilesHandler)
 }
 
+func setupDatabase(app *App) {
+	dbUrl := app.Config.Get("databaseUrl", "postgres://weeb:weeb@localhost:5432/weeb?sslmode=disable")
+	app.DB = NewPostgresDB(dbUrl, app.Log)
+}
+
+func setupTasks(app *App) {
+	app.Tasks = NewTasks(app)
+
+	app.Tasks.Register("start", func(app *App, _ []string) error {
+		app.Start()
+		return nil
+	})
+}
+
 // Start starts the application
 func (app *App) Start() {
 	port := app.Config.Get("port", "3000")
@@ -89,4 +107,14 @@ func (app *App) Start() {
 	server.Shutdown(ctx)
 	app.Log.Info("shutting down", L{})
 	os.Exit(0)
+}
+
+// Run runs the application tasks. It looks at command line arguments to know
+// which task to run
+func (app *App) Run() {
+	args := os.Args
+	if len(args) <= 1 {
+		args = []string{"", "start"}
+	}
+	app.Tasks.Run(args[1], args[2:])
 }

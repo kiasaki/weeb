@@ -40,8 +40,8 @@ _A weeb framework. For quickly building ambitious weeb applications._
 
 ### concepts
 
-Everything is in the DI container, everything is a provider, everything
-is optional / pluggable.
+The `weeb.App` object is god. It's passed around everywhere and is the gateway
+to most services exposed by weeb.
 
 ### starting a new project
 

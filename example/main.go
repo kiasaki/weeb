@@ -13,7 +13,7 @@ type App struct {
 func main() {
 	app := &App{weeb.NewApp()}
 	app.Router.HandleFunc("/", app.handleHome)
-	app.Start()
+	app.Run()
 }
 
 func (app *App) handleHome(w http.ResponseWriter, r *http.Request) {

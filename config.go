@@ -1,6 +1,7 @@
 package weeb
 
 import (
+	"fmt"
 	"os"
 	"strings"
 )
@@ -19,6 +20,14 @@ func NewConfig() *Config {
 func (c *Config) Get(key, alternative string) string {
 	if value, ok := c.values[key]; !ok || value == "" {
 		return alternative
+	} else {
+		return value
+	}
+}
+
+func (c *Config) MustGet(key string) string {
+	if value, ok := c.values[key]; !ok || value == "" {
+		panic(fmt.Sprintf("Config.MustGet: Key '%s' not found", key))
 	} else {
 		return value
 	}
