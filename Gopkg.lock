@@ -20,14 +20,38 @@
   version = "v1.6.1"
 
 [[projects]]
+  name = "github.com/gorilla/securecookie"
+  packages = ["."]
+  revision = "667fe4e3466a040b780561fe9b51a83a3753eefc"
+  version = "v1.1"
+
+[[projects]]
+  name = "github.com/gorilla/sessions"
+  packages = ["."]
+  revision = "ca9ada44574153444b00d3fd9c8559e4cc95f896"
+  version = "v1.1"
+
+[[projects]]
   branch = "master"
   name = "github.com/lib/pq"
   packages = [".","oid"]
-  revision = "27ea5d92de30060e7121ddd543fe14e9a327e0cc"
+  revision = "19c8e9ad00952ce0c64489b60e8df88bb16dd514"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/crypto"
+  packages = ["ssh/terminal"]
+  revision = "3d37316aaa6bd9929127ac9a527abf408178ea7b"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sys"
+  packages = ["unix","windows"]
+  revision = "af9a21289d0040306ecc55fa668c95246f1f8425"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4ecc78d0ec15b054964802a4bac7cc0a82d7e2de297b7a0f991762ba69eba059"
+  inputs-digest = "d0e4e7ce44f0c4009783f03295b04be1341821b999b3aa3d8b828bfdd39030fe"
   solver-name = "gps-cdcl"
   solver-version = 1

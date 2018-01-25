@@ -16,15 +16,27 @@ func NewConfig() *Config {
 	return &Config{values: map[string]string{}}
 }
 
-// Get gets a config value defaulting to `alternative` if non-present
-func (c *Config) Get(key, alternative string) string {
-	if value, ok := c.values[key]; !ok || value == "" {
-		return alternative
-	} else {
-		return value
+// Values returns a copy of all configured values
+func (c *Config) Values() map[string]string {
+	valuesCopy := map[string]string{}
+	for k, v := range c.values {
+		if v != "" {
+			valuesCopy[k] = v
+		}
 	}
+	return valuesCopy
 }
 
+// Get gets a config value defaulting to `alternative` if non-present
+func (c *Config) Get(key, alternative string) string {
+	value, ok := c.values[key]
+	if !ok || value == "" {
+		return alternative
+	}
+	return value
+}
+
+// MustGet is the same as Get but panics when a key is missing
 func (c *Config) MustGet(key string) string {
 	if value, ok := c.values[key]; !ok || value == "" {
 		panic(fmt.Sprintf("Config.MustGet: Key '%s' not found", key))
@@ -43,8 +55,8 @@ func (c *Config) Set(key, value string) {
 func (c *Config) LoadFromEnv() {
 	for _, value := range os.Environ() {
 		if value[0:4] == "APP_" {
-			splittedValue := strings.SplitN(value, "=", 2)
-			c.values[camelCase(splittedValue[0])] = splittedValue[1]
+			splittedValue := strings.SplitN(value[4:], "=", 2)
+			c.values[ToCamelCase(splittedValue[0])] = splittedValue[1]
 		}
 	}
 }
