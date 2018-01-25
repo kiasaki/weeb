@@ -66,7 +66,12 @@ func (db *PostgresDB) Query(dest []interface{}, query string, args ...interface{
 	return nil
 }
 
-func (db *PostgresDB) Exec(query string, args ...interface{}) (sql.Result, error) {
+func (db *PostgresDB) Exec(query string, args ...interface{}) error {
+	_, err := db.ExecWithResult(query, args...)
+	return err
+}
+
+func (db *PostgresDB) ExecWithResult(query string, args ...interface{}) (sql.Result, error) {
 	if err := db.Connect(); err != nil {
 		return nil, err
 	}

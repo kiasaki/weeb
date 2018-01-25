@@ -13,24 +13,26 @@ import (
 
 // App represents a web application instance
 type App struct {
-	Log    *Logger
-	Cache  Cache
-	Config *Config
-	Router *mux.Router
-	DB     DB
-	Tasks  *Tasks
+	Log        *Logger
+	Cache      Cache
+	Config     *Config
+	Router     *mux.Router
+	DB         DB
+	Migrations *MigrationRunner
+	Tasks      *TaskRunner
 }
 
 // NewApp create a new App instance
 func NewApp() *App {
 	app := &App{}
 
+	setupTasks(app)
 	setupConfig(app)
 	setupLog(app)
 	setupCache(app)
 	setupRouter(app)
 	setupDatabase(app)
-	setupTasks(app)
+	setupMigrations(app)
 
 	return app
 }
@@ -64,12 +66,18 @@ func setupRouter(app *App) {
 }
 
 func setupDatabase(app *App) {
-	dbUrl := app.Config.Get("databaseUrl", "postgres://weeb:weeb@localhost:5432/weeb?sslmode=disable")
-	app.DB = NewPostgresDB(dbUrl, app.Log)
+	dbURL := app.Config.Get("databaseUrl", "postgres://weeb:weeb@localhost:5432/weeb?sslmode=disable")
+	app.DB = NewPostgresDB(dbURL, app.Log)
+}
+
+func setupMigrations(app *App) {
+	app.Migrations = NewMigrationRunner(app)
+
+	app.Tasks.Register("migrate", migrationRunnerTask)
 }
 
 func setupTasks(app *App) {
-	app.Tasks = NewTasks(app)
+	app.Tasks = NewTaskRunner(app)
 
 	app.Tasks.Register("start", func(app *App, _ []string) error {
 		app.Start()
