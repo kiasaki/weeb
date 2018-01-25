@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/kiasaki/weeb"
+	"github.com/kiasaki/weeb/example/migrations"
 )
 
 type App struct {
@@ -12,6 +13,7 @@ type App struct {
 
 func main() {
 	app := &App{weeb.NewApp()}
+	migrations.AddMigrationsToApp(app.App)
 	app.Router.HandleFunc("/", app.handleHome)
 	app.Run()
 }

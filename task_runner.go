@@ -39,6 +39,7 @@ func (t *TaskRunner) Register(name string, fn TaskFn) {
 // task is not registered. If the task returns an error, that error will be
 // printed out before Run returns
 func (t *TaskRunner) Run(name string, args []string) {
+	SetGlobalLogLevel(LogLevelInfo)
 	task, ok := t.tasks[name]
 	if !ok {
 		fmt.Printf("No task named '%s' registered\n\n", name)
@@ -47,6 +48,6 @@ func (t *TaskRunner) Run(name string, args []string) {
 	}
 
 	if err := task(t.app, args); err != nil {
-		fmt.Printf("Error executing task '%s'\n\n%v", name, err)
+		fmt.Printf("Error executing task '%s'\n\n%v\n\n", name, err)
 	}
 }

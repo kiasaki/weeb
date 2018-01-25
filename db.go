@@ -11,7 +11,10 @@ import (
 type DB interface {
 	Connect() error
 	Query([]interface{}, string, ...interface{}) error
-	Exec(string, ...interface{}) (sql.Result, error)
+	QueryRow([]interface{}, string, ...interface{}) error
+	QueryRows(string, ...interface{}) (*sql.Rows, error)
+	Exec(string, ...interface{}) error
+	ExecWithResult(string, ...interface{}) (sql.Result, error)
 }
 
 // PostgresDB
@@ -30,7 +33,7 @@ func (db *PostgresDB) Connect() error {
 		return nil
 	}
 
-	database, err := sql.Open("pg", db.dbURL)
+	database, err := sql.Open("postgres", db.dbURL)
 	if err != nil {
 		return err
 	}
@@ -64,6 +67,25 @@ func (db *PostgresDB) Query(dest []interface{}, query string, args ...interface{
 	}
 
 	return nil
+}
+
+func (db *PostgresDB) QueryRow(dest []interface{}, query string, args ...interface{}) error {
+	if err := db.Connect(); err != nil {
+		return err
+	}
+
+	db.logger.Debug("sql", L{"query": query, "args": args})
+	row := db.db.QueryRow(query, args...)
+	return row.Scan(dest...)
+}
+
+func (db *PostgresDB) QueryRows(query string, args ...interface{}) (*sql.Rows, error) {
+	if err := db.Connect(); err != nil {
+		return nil, err
+	}
+
+	db.logger.Debug("sql", L{"query": query, "args": args})
+	return db.db.Query(query, args...)
 }
 
 func (db *PostgresDB) Exec(query string, args ...interface{}) error {

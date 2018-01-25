@@ -13,6 +13,29 @@ import (
 // L is a shorthand type for log message fields and context
 type L map[string]interface{}
 
+const (
+	LogLevelDebug   = "debug"
+	LogLevelInfo    = "info"
+	LogLevelWarning = "warning"
+	LogLevelError   = "error"
+	LogLevelFatal   = "fatal"
+)
+
+var logLevelsOrder = map[string]int{
+	LogLevelDebug:   1,
+	LogLevelInfo:    2,
+	LogLevelWarning: 3,
+	LogLevelError:   4,
+	LogLevelFatal:   5,
+}
+
+var currentLogLevel = LogLevelDebug
+
+// SetGlobalLogLevel sets the global log level
+func SetGlobalLogLevel(level string) {
+	currentLogLevel = level
+}
+
 // Logger is a logger instance
 type Logger struct {
 	formatter func(L) string
@@ -68,6 +91,11 @@ func (l *Logger) WithContext(addedContext L) *Logger {
 
 // Log sends a formatted log message to all configured outputs
 func (l *Logger) Log(level, msg string, extra L) {
+	// Abort if level is lower than current log level
+	if logLevelsOrder[level] < logLevelsOrder[currentLogLevel] {
+		return
+	}
+
 	message := L{}
 	for k, v := range l.context {
 		message[k] = v
@@ -86,27 +114,27 @@ func (l *Logger) Log(level, msg string, extra L) {
 
 // Debug logs a debug level message
 func (l *Logger) Debug(msg string, extra L) {
-	l.Log("debug", msg, extra)
+	l.Log(LogLevelDebug, msg, extra)
 }
 
 // Info logs a debug level message
 func (l *Logger) Info(msg string, extra L) {
-	l.Log("info", msg, extra)
+	l.Log(LogLevelInfo, msg, extra)
 }
 
 // Warning logs a debug level message
 func (l *Logger) Warning(msg string, extra L) {
-	l.Log("warning", msg, extra)
+	l.Log(LogLevelWarning, msg, extra)
 }
 
 // Error logs a debug level message
 func (l *Logger) Error(msg string, extra L) {
-	l.Log("error", msg, extra)
+	l.Log(LogLevelError, msg, extra)
 }
 
 // Fatal logs a debug level message
 func (l *Logger) Fatal(msg string, extra L) {
-	l.Log("fatal", msg, extra)
+	l.Log(LogLevelFatal, msg, extra)
 }
 
 // Println logs and info level message
