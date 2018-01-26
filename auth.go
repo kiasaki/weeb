@@ -2,9 +2,7 @@ package weeb
 
 import "net/http"
 
-type contextKey int
-
-var authUserKey contextKey = 0
+var authUserKey contextKey = 1
 
 type AuthUser interface {
 	ID() string
@@ -28,6 +26,6 @@ func (a *Auth) CurrentUser(r *http.Request) AuthUser {
 		return user
 	}
 
-	userID := a.App.Session.Get(r, "")
+	//userID := a.app.Session.Get(r, "")
 	return nil
 }

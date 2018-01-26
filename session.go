@@ -34,40 +34,42 @@ func (s *Session) ensureStore() {
 		if secret == "" {
 			panic("Session: no 'secret' config is set. Use the 'generate-session-key' to generate one")
 		}
-		secretParts := strings.Split(secret, ",", -1)
+		secretParts := strings.Split(secret, ",")
 		if len(secretParts) == 2 {
 			// Allow key rotations by splitting the secret config on the ','
-			s.store = NewCookieStore([]byte(secretParts[0]), nil, []byte(secretParts[1]), nil)
+			s.store = sessions.NewCookieStore([]byte(secretParts[0]), nil, []byte(secretParts[1]), nil)
 		} else {
-			s.store = NewCookieStore([]byte(secret))
+			s.store = sessions.NewCookieStore([]byte(secret))
 		}
 	}
 }
 
 func (s *Session) GetSession(r *http.Request) *sessions.Session {
 	s.ensureStore()
-	return s.store.Get(r, s.app.Config.Get("name", "app"))
+	session, _ := s.store.Get(r, s.app.Config.Get("name", "app"))
+	return session
 }
 
 func (s *Session) Get(r *http.Request, key string) string {
-	session := s.GetSession()
+	session := s.GetSession(r)
 	return session.Values[key].(string)
 }
 
 func (s *Session) Set(r *http.Request, key, value string) {
-	session := s.GetSession()
+	session := s.GetSession(r)
 	session.Values[key] = value
 }
 
 func (s *Session) AddFlash(r *http.Request, kind, message string) {
-	session := s.GetSession()
+	session := s.GetSession(r)
 	session.AddFlash(&Flash{Kind: kind, Message: message})
 }
 
 func (s *Session) Flashes(r *http.Request) []*Flash {
-	session := s.GetSession()
+	session := s.GetSession(r)
 	flashes := []*Flash{}
-	for f := range session.Flashes() {
+	for _, f := range session.Flashes() {
 		flashes = append(flashes, f.(*Flash))
 	}
+	return flashes
 }

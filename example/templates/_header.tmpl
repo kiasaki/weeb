@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Weeb App</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css">
+  <link rel="stylesheet" href="/static/app.css">
+  <script defer src="https://use.fontawesome.com/releases/v5.0.0/js/all.js"></script>
+  <script defer src="/static/app.js"></script>
+</head>
+<body>
+  <!--
+  <nav class="navbar">
+    <div class="container">
+    </div>
+  </nav>
+  -->
+  <section class="hero is-info is-bold">
+    <div class="hero-head">
+      <nav class="navbar">
+        <div class="container">
+          <div class="navbar-brand">
+            <a class="navbar-item is-size-4 has-text-weight-light">Weeb</a>
+            <span class="navbar-burger burger" data-target="navbarMenuHeroB">
+              <span></span><span></span><span></span>
+            </span>
+          </div>
+          <div id="navbarMenuHeroB" class="navbar-menu">
+            <div class="navbar-end level">
+              <div class="dropdown is-right level-item">
+                <div class="dropdown-trigger">
+                  <a class="navbar-item">
+                    username &nbsp;
+                    <span class="icon is-small">
+                      <i class="fas fa-angle-down" aria-hidden="true"></i>
+                    </span>
+                  </a>
+                </div>
+                <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                  <div class="dropdown-content">
+                    <a href="#" class="dropdown-item">
+                      Logout
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <!--
+              <a class="navbar-item">
+                Documentation
+              </a>
+              <span class="navbar-item">
+                <a class="button is-info is-inverted">
+                  <span class="icon"><i class="fab fa-github"></i></span>
+                  <span>Download</span>
+                </a>
+              </span>
+              -->
+            </div>
+          </div>
+        </div>
+      </nav>
+    </div>
+
+    <div class="hero-foot">
+      <nav class="tabs is-boxed">
+        <div class="container">
+          <ul>
+            <li class="is-active">
+              <a>Overview</a>
+            </li>
+            <li>
+              <a>Modifiers</a>
+            </li>
+            <li>
+              <a>Grid</a>
+            </li>
+            <li>
+              <a>Elements</a>
+            </li>
+            <li>
+              <a>Components</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      <div class="columns">
+        <aside class="menu column is-3">
+          <p class="menu-label">
+            General
+          </p>
+          <ul class="menu-list">
+            <li><a>Dashboard</a></li>
+            <li><a>Customers</a></li>
+          </ul>
+        </aside>
+        <div class="column">

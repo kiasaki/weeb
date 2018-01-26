@@ -1,9 +1,11 @@
 package weeb
 
 import (
+	"bytes"
 	"crypto/rand"
 	"encoding/gob"
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -11,6 +13,8 @@ func init() {
 	gob.Register(&J{})
 	gob.Register(&Flash{})
 }
+
+type contextKey int
 
 // J is a shorthand used to build JSON values
 type J map[string]interface{}
@@ -35,6 +39,15 @@ func (u *UUID) String() string {
 	return fmt.Sprintf("%x-%x-%x-%x-%x", u[:4], u[4:6], u[6:8], u[8:10], u[10:])
 }
 
+func dirExists(path string) bool {
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return fileInfo.IsDir()
+}
+
+// ToCamelCase converts a string to camel case.
 func ToCamelCase(givenValue string) string {
 	value := strings.ToLower(givenValue)
 	valueParts := strings.Split(value, "_")
@@ -48,6 +61,27 @@ func ToCamelCase(givenValue string) string {
 		out += firstChar + part[1:]
 	}
 	return out
+}
+
+// ToSnakeCase converts a string to snake case, words separated with underscores.
+func ToSnakeCase(src string) string {
+	thisUpper := false
+	prevUpper := false
+
+	buf := bytes.NewBufferString("")
+	for i, v := range src {
+		if v >= 'A' && v <= 'Z' {
+			thisUpper = true
+		} else {
+			thisUpper = false
+		}
+		if i > 0 && thisUpper && !prevUpper {
+			buf.WriteRune('_')
+		}
+		prevUpper = thisUpper
+		buf.WriteRune(v)
+	}
+	return strings.ToLower(buf.String())
 }
 
 func displayMap(valuesMap map[string]string, leftPadding, keyPadding int) string {

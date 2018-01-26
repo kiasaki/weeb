@@ -83,7 +83,6 @@ WHERE u.username = ?
 */
 
 import (
-	"bytes"
 	"database/sql"
 	"fmt"
 	"reflect"
@@ -253,26 +252,4 @@ func doScan(dest interface{}, rows rows, alias string) error {
 	}
 
 	return rows.Scan(values...)
-}
-
-// ToSnakeCase converts a string to snake case, words separated with underscores.
-// It's intended to be used with NameMapper to map struct field names to snake case database fields.
-func ToSnakeCase(src string) string {
-	thisUpper := false
-	prevUpper := false
-
-	buf := bytes.NewBufferString("")
-	for i, v := range src {
-		if v >= 'A' && v <= 'Z' {
-			thisUpper = true
-		} else {
-			thisUpper = false
-		}
-		if i > 0 && thisUpper && !prevUpper {
-			buf.WriteRune('_')
-		}
-		prevUpper = thisUpper
-		buf.WriteRune(v)
-	}
-	return strings.ToLower(buf.String())
 }

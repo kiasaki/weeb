@@ -3,22 +3,23 @@ package weeb
 import (
 	"context"
 	"fmt"
+	"html/template"
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"time"
 
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
 )
 
 // App represents a web application instance
 type App struct {
-	Log     *Logger
-	Config  *Config
-	Router  *mux.Router
-	Session *Session
+	Log       *Logger
+	Config    *Config
+	Router    *Router
+	Session   *Session
+	templates *template.Template
 
 	Cache Cache
 	DB    DB
@@ -39,6 +40,7 @@ func NewApp() *App {
 	setupSession(app)
 	setupCache(app)
 	setupRouter(app)
+	setupTemplates(app)
 	setupDatabase(app)
 	setupMigrations(app)
 
@@ -97,13 +99,31 @@ func setupCache(app *App) {
 }
 
 func setupRouter(app *App) {
-	app.Router = mux.NewRouter()
+	app.Router = NewRouter(app)
 
-	app.Router.Use(handlers.RecoveryHandler(handlers.RecoveryLogger(app.Log)))
-	app.Router.Use(app.loggingMiddleware)
+	app.Router.Use(recoverMiddleware)
+	app.Router.Use(loggingMiddleware)
 
-	staticFilesHandler := http.StripPrefix("/static/", http.FileServer(http.Dir("static")))
-	app.Router.PathPrefix("/static/").Handler(staticFilesHandler)
+	app.Router.Static("/static/", "static")
+}
+
+func setupTemplates(app *App) {
+	if dirExists("templates") {
+		var err error
+		app.templates, err = template.ParseGlob("templates/*")
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		for _, t := range app.templates.Templates() {
+			name := t.Name()
+			ext := filepath.Ext(name)
+			app.templates, _ = app.templates.AddParseTree(name[:len(name)-len(ext)], t.Tree)
+		}
+	} else {
+		// Make sure tempaltes is a valid instance of *tempalte.Template
+		app.templates = template.New("weeb")
+	}
 }
 
 func setupDatabase(app *App) {
