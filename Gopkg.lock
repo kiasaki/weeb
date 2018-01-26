@@ -2,16 +2,28 @@
 
 
 [[projects]]
+  name = "github.com/fatih/color"
+  packages = ["."]
+  revision = "570b54cabe6b8eb0bc2dfce68d964677d63b5260"
+  version = "v1.5.0"
+
+[[projects]]
+  name = "github.com/fsnotify/fsnotify"
+  packages = ["."]
+  revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
+  version = "v1.4.7"
+
+[[projects]]
+  name = "github.com/gobuffalo/envy"
+  packages = ["."]
+  revision = "e613c80275b86293880eddeb27417c9a7c670ff3"
+  version = "v1.3.0"
+
+[[projects]]
   name = "github.com/gorilla/context"
   packages = ["."]
   revision = "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
   version = "v1.1"
-
-[[projects]]
-  name = "github.com/gorilla/handlers"
-  packages = ["."]
-  revision = "90663712d74cb411cbef281bc1e08c19d1a76145"
-  version = "v1.3.0"
 
 [[projects]]
   name = "github.com/gorilla/mux"
@@ -32,6 +44,18 @@
   version = "v1.1"
 
 [[projects]]
+  name = "github.com/inconshreveable/mousetrap"
+  packages = ["."]
+  revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+  version = "v1.0"
+
+[[projects]]
+  name = "github.com/joho/godotenv"
+  packages = ["."]
+  revision = "a79fa1e548e2c689c241d10173efd51e5d689d5b"
+  version = "v1.2.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/lib/pq"
   packages = [".","oid"]
@@ -39,19 +63,67 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/markbates/going"
+  packages = ["defaults"]
+  revision = "0576708c56cea02331f864fe6e157ac7841923e4"
+
+[[projects]]
+  name = "github.com/markbates/refresh"
+  packages = [".","cmd","refresh"]
+  revision = "31a58af168f3788ce36d49f66aca4b439f64c7d4"
+  version = "v1.3.3"
+
+[[projects]]
+  name = "github.com/mattn/go-colorable"
+  packages = ["."]
+  revision = "167de6bfdfba052fa6b2d3664c8f5272e23c9072"
+  version = "v0.0.9"
+
+[[projects]]
+  name = "github.com/mattn/go-isatty"
+  packages = ["."]
+  revision = "0360b2af4f38e8d38c7fce2a9f4e702702d73a39"
+  version = "v0.0.3"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/mitchellh/go-homedir"
+  packages = ["."]
+  revision = "b8bc1bf767474819792c23f32d8286a45736f1c6"
+
+[[projects]]
+  name = "github.com/spf13/cobra"
+  packages = ["."]
+  revision = "7b2c5ac9fc04fc5efafb60700713d4fa609b777b"
+  version = "v0.0.1"
+
+[[projects]]
+  name = "github.com/spf13/pflag"
+  packages = ["."]
+  revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
+  version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "3d37316aaa6bd9929127ac9a527abf408178ea7b"
+  revision = "0efb9460aaf800c6376acf625be2853bceac2e06"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix","windows"]
-  revision = "af9a21289d0040306ecc55fa668c95246f1f8425"
+  revision = "03467258950d845cd1877eab69461b98e8c09219"
+
+[[projects]]
+  branch = "v2"
+  name = "gopkg.in/yaml.v2"
+  packages = ["."]
+  revision = "d670f9405373e636a5a2765eea47fac0c9bc91a4"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d0e4e7ce44f0c4009783f03295b04be1341821b999b3aa3d8b828bfdd39030fe"
+  inputs-digest = "b4da6832d807198cc2f76449f8bfcfb1df85ea747d33b26d7572d36ffff36590"
   solver-name = "gps-cdcl"
   solver-version = 1

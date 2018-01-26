@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"github.com/gorilla/securecookie"
+	"github.com/markbates/refresh/refresh"
+	refreshweb "github.com/markbates/refresh/refresh/web"
 )
 
 // App represents a web application instance
@@ -52,6 +54,11 @@ func setupTasks(app *App) {
 
 	app.Tasks.Register("start", func(app *App, _ []string) error {
 		app.Start()
+		return nil
+	})
+
+	app.Tasks.Register("dev", func(app *App, _ []string) error {
+		app.Dev()
 		return nil
 	})
 }
@@ -103,6 +110,9 @@ func setupRouter(app *App) {
 
 	app.Router.Use(recoverMiddleware)
 	app.Router.Use(loggingMiddleware)
+	if app.Config.GetBool("dev") {
+		app.Router.UseHTTP(refreshweb.ErrorChecker)
+	}
 
 	app.Router.Static("/static/", "static")
 }
@@ -167,6 +177,25 @@ func (app *App) Start() {
 	server.Shutdown(ctx)
 	app.Log.Info("shutting down", L{})
 	os.Exit(0)
+}
+
+// Dev runs the application in dev mode rebuilding the current directory on file changes
+func (app *App) Dev() {
+	config := &refresh.Configuration{
+		AppRoot:            ".",
+		IgnoredFolders:     []string{"tmp", "vendor", "node_modules"},
+		IncludedExtensions: []string{".go", ".tmpl", ".html", ".json", ".yml", ".yaml"},
+		BuildPath:          "/tmp",
+		BuildDelay:         10 * time.Millisecond,
+		BinaryName:         "weeb-dev",
+		CommandFlags:       []string{"start"},
+		CommandEnv:         []string{"APP_DEV=1"},
+		EnableColors:       true,
+	}
+	if err := refresh.New(config).Start(); err != nil {
+		app.Log.Error("error starting dev server", L{"err": err.Error()})
+		os.Exit(1)
+	}
 }
 
 // Run runs the application tasks. It looks at command line arguments to know

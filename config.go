@@ -27,6 +27,13 @@ func (c *Config) Values() map[string]string {
 	return valuesCopy
 }
 
+// GetBool gets a boolean value for a config key. Where the only true value a
+// config can have is '1' or 'true'
+func (c *Config) GetBool(key string) bool {
+	value := c.Get(key, "")
+	return value == "1" || value == "true"
+}
+
 // Get gets a config value defaulting to `alternative` if non-present
 func (c *Config) Get(key, alternative string) string {
 	value, ok := c.values[key]
