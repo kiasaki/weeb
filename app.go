@@ -39,7 +39,6 @@ func NewApp() *App {
 	setupTasks(app)
 	setupConfig(app)
 	setupLog(app)
-	setupSession(app)
 	setupCache(app)
 	setupRouter(app)
 	setupTemplates(app)
@@ -59,6 +58,11 @@ func setupTasks(app *App) {
 
 	app.Tasks.Register("dev", func(app *App, _ []string) error {
 		app.Dev()
+		return nil
+	})
+
+	app.Tasks.Register("generate-session-key", func(app *App, _ []string) error {
+		fmt.Println(string(securecookie.GenerateRandomKey(64)))
 		return nil
 	})
 }
@@ -90,15 +94,6 @@ func setupLog(app *App) {
 		context["app"] = name
 	}
 	app.Log = NewLogger().SetContext(context)
-}
-
-func setupSession(app *App) {
-	app.Session = NewSession(app)
-
-	app.Tasks.Register("generate-session-key", func(app *App, _ []string) error {
-		fmt.Println(string(securecookie.GenerateRandomKey(64)))
-		return nil
-	})
 }
 
 func setupCache(app *App) {

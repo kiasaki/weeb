@@ -1,7 +1,6 @@
 package weeb
 
 import (
-	"net/http"
 	"strings"
 
 	"github.com/gorilla/sessions"
@@ -20,17 +19,17 @@ type Flash struct {
 }
 
 type Session struct {
-	app   *App
+	ctx   *Context
 	store *sessions.CookieStore
 }
 
-func NewSession(app *App) *Session {
-	return &Session{app: app}
+func NewSession(ctx *Context) *Session {
+	return &Session{ctx: ctx}
 }
 
 func (s *Session) ensureStore() {
 	if s.store == nil {
-		secret := s.app.Config.Get("secret", "")
+		secret := s.ctx.App().Config.Get("secret", "")
 		if secret == "" {
 			panic("Session: no 'secret' config is set. Use the 'generate-session-key' to generate one")
 		}
@@ -44,29 +43,37 @@ func (s *Session) ensureStore() {
 	}
 }
 
-func (s *Session) GetSession(r *http.Request) *sessions.Session {
+func (s *Session) save() {
+	if s.store == nil {
+		return
+	}
+	s.GetSession().Save(s.ctx.Request, s.ctx.Response)
+}
+
+func (s *Session) GetSession() *sessions.Session {
 	s.ensureStore()
-	session, _ := s.store.Get(r, s.app.Config.Get("name", "app"))
+	sessionName := s.ctx.App().Config.Get("name", "_app_session")
+	session, _ := s.store.Get(s.ctx.Request, sessionName)
 	return session
 }
 
-func (s *Session) Get(r *http.Request, key string) string {
-	session := s.GetSession(r)
+func (s *Session) Get(key string) string {
+	session := s.GetSession()
 	return session.Values[key].(string)
 }
 
-func (s *Session) Set(r *http.Request, key, value string) {
-	session := s.GetSession(r)
+func (s *Session) Set(key, value string) {
+	session := s.GetSession()
 	session.Values[key] = value
 }
 
-func (s *Session) AddFlash(r *http.Request, kind, message string) {
-	session := s.GetSession(r)
+func (s *Session) AddFlash(kind, message string) {
+	session := s.GetSession()
 	session.AddFlash(&Flash{Kind: kind, Message: message})
 }
 
-func (s *Session) Flashes(r *http.Request) []*Flash {
-	session := s.GetSession(r)
+func (s *Session) Flashes() []*Flash {
+	session := s.GetSession()
 	flashes := []*Flash{}
 	for _, f := range session.Flashes() {
 		flashes = append(flashes, f.(*Flash))

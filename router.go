@@ -14,7 +14,17 @@ type Router struct {
 }
 
 func NewRouter(app *App) *Router {
-	return &Router{app: app, router: mux.NewRouter()}
+	r := &Router{app: app, router: mux.NewRouter()}
+	r.Use(func(next HandlerFunc) HandlerFunc {
+		return func(ctx *Context) error {
+			if err := next(ctx); err != nil {
+				ctx.Log.Error(err.Error(), L{})
+			}
+			ctx.finalizeResponse()
+			return nil
+		}
+	})
+	return r
 }
 
 func (r *Router) Group(prefix string) *Router {
@@ -84,7 +94,7 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Router) requestContext(w http.ResponseWriter, req *http.Request) *Context {
-	ctx, ok := req.Context().Value(authUserKey).(*Context)
+	ctx, ok := req.Context().Value(requestContextKey).(*Context)
 	if ok {
 		return ctx
 	}

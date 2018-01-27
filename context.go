@@ -7,44 +7,60 @@ import (
 
 var requestContextKey contextKey = 0
 
-// ResponseWriter wrapper that keeps track of the status code we sent
-type responseWriterWithStatus struct {
-	http.ResponseWriter
-	code int
-}
-
-func (w *responseWriterWithStatus) WriteHeader(code int) {
-	w.code = code
-	w.ResponseWriter.WriteHeader(code)
-}
-func (w *responseWriterWithStatus) Status() int { return w.code }
-
 type Context struct {
-	app      *App
-	Request  *http.Request
-	Response http.ResponseWriter
+	app        *App
+	statusCode int
+	body       string
+	Request    *http.Request
+	Response   http.ResponseWriter
 
-	Log *Logger
+	Data    J
+	Log     *Logger
+	Session *Session
 }
 
 func NewContext(app *App, w http.ResponseWriter, r *http.Request) *Context {
-	ctx := &Context{app: app}
+	ctx := &Context{app: app, statusCode: 200}
 
 	ctx.Request = r.WithContext(context.WithValue(r.Context(), requestContextKey, ctx))
-	ctx.Response = &responseWriterWithStatus{w, 0}
+	ctx.Response = w
 
+	ctx.Data = J{}
 	ctx.Log = app.Log.WithContext(L{})
+	ctx.Session = NewSession(ctx)
 
 	return ctx
+}
+
+func (ctx *Context) App() *App {
+	return ctx.app
 }
 
 func (ctx *Context) HandleError(err error) {
 	if err == nil {
 		return
 	}
-	ctx.SendText(500, "internal server error")
+	ctx.Text(500, "internal server error")
+}
+
+func (ctx *Context) SetHeader(name, value string) {
+	ctx.Response.Header().Set(name, value)
+}
+
+func (ctx *Context) SetStatusCode(code int) {
+	ctx.statusCode = code
+}
+
+func (ctx *Context) SetBody(body string) {
+	ctx.body = body
 }
 
 func (ctx *Context) StatusCode() int {
-	return ctx.Response.(*responseWriterWithStatus).Status()
+	return ctx.statusCode
+}
+
+func (ctx *Context) finalizeResponse() {
+	ctx.Session.save()
+	ctx.Response.WriteHeader(ctx.statusCode)
+	ctx.Response.Write([]byte(ctx.body))
 }

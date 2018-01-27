@@ -14,13 +14,13 @@ func main() {
 }
 
 func handleHome(ctx *weeb.Context) error {
-	return ctx.SendHTML(200, "home", weeb.J{
+	return ctx.HTML(200, "home", weeb.J{
 		"message": "Hello World!",
 	})
 }
 
 func handleHello(ctx *weeb.Context) error {
-	return ctx.SendJSON(200, weeb.J{
+	return ctx.JSON(200, weeb.J{
 		"message": "Hello World!",
 	})
 }
