@@ -20,7 +20,9 @@ func NewRouter(app *App) *Router {
 			if err := next(ctx); err != nil {
 				ctx.Log.Error(err.Error(), L{})
 			}
-			ctx.finalizeResponse()
+			if ctx.Response.(*responseWriterWithStatusCode).statusCode != 0 {
+				ctx.finalizeResponse()
+			}
 			return nil
 		}
 	})
@@ -93,10 +95,20 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	r.router.ServeHTTP(w, req)
 }
 
+type responseWriterWithStatusCode struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (w *responseWriterWithStatusCode) WriteHeader(code int) {
+	w.statusCode = code
+	w.ResponseWriter.WriteHeader(code)
+}
+
 func (r *Router) requestContext(w http.ResponseWriter, req *http.Request) *Context {
 	ctx, ok := req.Context().Value(requestContextKey).(*Context)
 	if ok {
 		return ctx
 	}
-	return NewContext(r.app, w, req)
+	return NewContext(r.app, &responseWriterWithStatusCode{w, 0}, req)
 }

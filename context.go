@@ -15,8 +15,10 @@ type Context struct {
 	Response   http.ResponseWriter
 
 	Data    J
+	DB      DB
 	Log     *Logger
 	Session *Session
+	Auth    *Auth
 }
 
 func NewContext(app *App, w http.ResponseWriter, r *http.Request) *Context {
@@ -26,8 +28,10 @@ func NewContext(app *App, w http.ResponseWriter, r *http.Request) *Context {
 	ctx.Response = w
 
 	ctx.Data = J{}
+	ctx.DB = app.DB
 	ctx.Log = app.Log.WithContext(L{})
 	ctx.Session = NewSession(ctx)
+	ctx.Auth = NewAuth(ctx)
 
 	return ctx
 }
@@ -40,6 +44,7 @@ func (ctx *Context) HandleError(err error) {
 	if err == nil {
 		return
 	}
+	ctx.Log.Error("request error", L{"err": err.Error()})
 	ctx.Text(500, "internal server error")
 }
 

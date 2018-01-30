@@ -28,8 +28,6 @@ type App struct {
 
 	Migrations *MigrationRunner
 	Tasks      *TaskRunner
-
-	Auth *Auth
 }
 
 // NewApp create a new App instance

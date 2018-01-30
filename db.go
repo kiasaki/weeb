@@ -10,6 +10,7 @@ import (
 // DB
 type DB interface {
 	Connect() error
+	QueryOne(interface{}, string, ...interface{}) error
 	Query([]interface{}, string, ...interface{}) error
 	QueryRow([]interface{}, string, ...interface{}) error
 	QueryRows(string, ...interface{}) (*sql.Rows, error)
@@ -44,6 +45,11 @@ func (db *PostgresDB) Connect() error {
 		return err
 	}
 	return nil
+}
+
+func (db *PostgresDB) QueryOne(dest interface{}, query string, args ...interface{}) error {
+	destList := []interface{}{dest}
+	return db.Query(destList, query, args...)
 }
 
 func (db *PostgresDB) Query(dest []interface{}, query string, args ...interface{}) error {
