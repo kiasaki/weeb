@@ -111,6 +111,15 @@ func displayMap(valuesMap map[string]string, leftPadding, keyPadding int) string
 	return out
 }
 
+func containsString(values []string, search string) bool {
+	for _, value := range values {
+		if value == search {
+			return true
+		}
+	}
+	return false
+}
+
 const randomKeyDict = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
 func generateRandomKey(length int) string {

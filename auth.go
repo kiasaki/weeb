@@ -1,6 +1,8 @@
 package weeb
 
-import "time"
+import (
+	"time"
+)
 
 var authUserKey contextKey = 1
 
@@ -28,7 +30,21 @@ func NewAuth(app *App) *Auth {
 func (a *Auth) RequireRoles(roles ...string) func(HandlerFunc) HandlerFunc {
 	return func(next HandlerFunc) HandlerFunc {
 		return func(ctx *Context) error {
-			return nil
+			user, err := ctx.Auth.CurrentUser(ctx)
+			if err != nil {
+				return err
+			}
+			if user == nil {
+				return ctx.Error(401, "unauthorized")
+			}
+			userRoles := user.AuthRoles()
+			for _, role := range roles {
+				if !containsString(userRoles, role) {
+					return ctx.Error(403, "forbidden")
+				}
+			}
+
+			return next(ctx)
 		}
 	}
 }

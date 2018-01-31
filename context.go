@@ -52,16 +52,26 @@ func (ctx *Context) HandleError(err error) {
 	ctx.Error(500, "internal server error")
 }
 
-func (ctx *Context) Error(code int, message string) {
+func (ctx *Context) Error(code int, message string) error {
 	if handlerFn, ok := ctx.app.Router.ErrorHandlers[code]; ok {
 		err := handlerFn(ctx)
+		// handle error ourselves to avoid HandleError -> Error -> HandleError loops
 		if err != nil {
 			ctx.Log.Error("request error", L{"err": err.Error()})
 			ctx.Text(500, "internal server error")
 		}
-		return
+		return nil
 	}
-	ctx.Text(code, message)
+	return ctx.Text(code, message)
+}
+
+func (ctx *Context) Redirect(url string) error {
+	return ctx.RedirectWithCode(http.StatusFound, url)
+}
+
+func (ctx *Context) RedirectWithCode(code int, url string) error {
+	http.Redirect(ctx.Response, ctx.Request, url, code)
+	return nil
 }
 
 func (ctx *Context) SetHeader(name, value string) {

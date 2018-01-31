@@ -160,14 +160,19 @@ func defaultLogOutput(message string) {
 }
 
 func prettyLogOutput(message string) {
-
 	value := L{}
 	if err := json.Unmarshal([]byte(message), &value); err != nil {
 		panic(err)
 	}
 
+	parsedTime, err := time.Parse(time.RFC3339, value["time"].(string))
+	if err != nil {
+		panic(err)
+	}
+	prettyTime := parsedTime.Format("2006/01/02 15:06:07")
+
 	level := strings.ToUpper(value["level"].(string))
-	fmt.Printf("%v %v %v ", value["time"], level, value["msg"])
+	fmt.Printf("%v %v %v ", prettyTime, level, value["msg"])
 
 	delete(value, "time")
 	delete(value, "level")

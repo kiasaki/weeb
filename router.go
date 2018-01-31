@@ -21,7 +21,7 @@ func NewRouter(app *App) *Router {
 			if err := next(ctx); err != nil {
 				ctx.Log.Error(err.Error(), L{})
 			}
-			if ctx.Response.(*responseWriterWithStatusCode).statusCode != 0 {
+			if ctx.Response.(*responseWriterWithStatusCode).statusCode == 0 {
 				ctx.finalizeResponse()
 			}
 			return nil
