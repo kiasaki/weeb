@@ -44,10 +44,10 @@
   version = "v1.1"
 
 [[projects]]
-  name = "github.com/inconshreveable/mousetrap"
-  packages = ["."]
-  revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
-  version = "v1.0"
+  branch = "master"
+  name = "github.com/jmoiron/sqlx"
+  packages = [".","reflectx"]
+  revision = "05cef0741ade10ca668982355b3f3f0bcf0ff0a8"
 
 [[projects]]
   name = "github.com/joho/godotenv"
@@ -69,7 +69,7 @@
 
 [[projects]]
   name = "github.com/markbates/refresh"
-  packages = [".","cmd","refresh"]
+  packages = ["refresh","refresh/web"]
   revision = "31a58af168f3788ce36d49f66aca4b439f64c7d4"
   version = "v1.3.3"
 
@@ -92,18 +92,6 @@
   revision = "b8bc1bf767474819792c23f32d8286a45736f1c6"
 
 [[projects]]
-  name = "github.com/spf13/cobra"
-  packages = ["."]
-  revision = "7b2c5ac9fc04fc5efafb60700713d4fa609b777b"
-  version = "v0.0.1"
-
-[[projects]]
-  name = "github.com/spf13/pflag"
-  packages = ["."]
-  revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
-  version = "v1.0.0"
-
-[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
@@ -124,6 +112,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b4da6832d807198cc2f76449f8bfcfb1df85ea747d33b26d7572d36ffff36590"
+  inputs-digest = "1b2e7536b07382c8159f70eaf3d00608db5639d5cf511ecbbbed6ec9b231c033"
   solver-name = "gps-cdcl"
   solver-version = 1

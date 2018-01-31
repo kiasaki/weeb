@@ -3,6 +3,8 @@ package weeb
 import (
 	"context"
 	"net/http"
+
+	"github.com/kiasaki/weeb/id"
 )
 
 var requestContextKey contextKey = 0
@@ -19,6 +21,7 @@ type Context struct {
 	Log     *Logger
 	Session *Session
 	Auth    *Auth
+	ID      *id.Gen
 }
 
 func NewContext(app *App, w http.ResponseWriter, r *http.Request) *Context {
@@ -31,7 +34,8 @@ func NewContext(app *App, w http.ResponseWriter, r *http.Request) *Context {
 	ctx.DB = app.DB
 	ctx.Log = app.Log.WithContext(L{})
 	ctx.Session = NewSession(ctx)
-	ctx.Auth = NewAuth(ctx)
+	ctx.Auth = app.Auth
+	ctx.ID = id.NewGen(0)
 
 	return ctx
 }
@@ -45,7 +49,19 @@ func (ctx *Context) HandleError(err error) {
 		return
 	}
 	ctx.Log.Error("request error", L{"err": err.Error()})
-	ctx.Text(500, "internal server error")
+	ctx.Error(500, "internal server error")
+}
+
+func (ctx *Context) Error(code int, message string) {
+	if handlerFn, ok := ctx.app.Router.ErrorHandlers[code]; ok {
+		err := handlerFn(ctx)
+		if err != nil {
+			ctx.Log.Error("request error", L{"err": err.Error()})
+			ctx.Text(500, "internal server error")
+		}
+		return
+	}
+	ctx.Text(code, message)
 }
 
 func (ctx *Context) SetHeader(name, value string) {

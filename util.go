@@ -7,11 +7,16 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/gorilla/securecookie"
+	"github.com/jmoiron/sqlx"
 )
 
 func init() {
 	gob.Register(&J{})
 	gob.Register(&Flash{})
+
+	sqlx.NameMapper = ToSnakeCase
 }
 
 type contextKey int
@@ -104,4 +109,17 @@ func displayMap(valuesMap map[string]string, leftPadding, keyPadding int) string
 		out += "\n"
 	}
 	return out
+}
+
+const randomKeyDict = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+
+func generateRandomKey(length int) string {
+	key := securecookie.GenerateRandomKey(length)
+	if key == nil {
+		panic("securecookie.GenerateRandomKey returned nil")
+	}
+	for i := range key {
+		key[i] = randomKeyDict[key[i]%byte(len(randomKeyDict))]
+	}
+	return string(key)
 }

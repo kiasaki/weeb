@@ -8,8 +8,13 @@ import (
 func main() {
 	app := weeb.NewApp()
 	migrations.AddMigrationsToApp(app)
+
 	app.Router.Get("/", handleHome)
 	app.Router.Get("/hello", handleHello)
+
+	admin := app.Router.Group("/admin")
+	admin.Use(app.Auth.RequireRoles("admin"))
+
 	app.Run()
 }
 

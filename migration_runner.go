@@ -50,14 +50,14 @@ func (m *MigrationRunner) currentMigrationIndex() (int, error) {
 		return 0, err
 	}
 
-	lastMigrationID := ""
+	lastMigration := struct{ id string }{""}
 	lastMigrationSQL := `SELECT id FROM migrations ORDER BY id DESC LIMIT 1`
-	err := m.app.DB.QueryRow([]interface{}{&lastMigrationID}, lastMigrationSQL)
+	err := m.app.DB.QueryOne(&lastMigration, lastMigrationSQL)
 	if err != nil && err != sql.ErrNoRows {
 		return 0, err
 	}
 
-	if lastMigrationID == "" {
+	if lastMigration.id == "" {
 		return 0, nil
 	}
 
@@ -67,7 +67,7 @@ func (m *MigrationRunner) currentMigrationIndex() (int, error) {
 
 	currentIndex := 0
 	for i, m := range m.migrations {
-		if m.ID > lastMigrationID {
+		if m.ID > lastMigration.id {
 			break
 		}
 		currentIndex = i
@@ -161,12 +161,14 @@ func migrationRunnerTask(app *App, args []string) error {
 		return migrationRunnerTaskHelp(app)
 	} else if args[0] == "help" {
 		return migrationRunnerTaskHelp(app)
+	} else if args[0] == "list" {
+		return migrationRunnerTaskList(app)
 	} else if args[0] == "up" {
 		return migrationRunnerTaskUp(app)
 	} else if args[0] == "down" {
 		return migrationRunnerTaskDown(app)
 	} else if args[0] == "create" {
-		return migrationRunnerTaskCreate(app)
+		return migrationRunnerTaskCreate(app, args[1:])
 	}
 	fmt.Printf("Error: unknown sub-task '%s' for task 'migrate'\n\n", args[0])
 	return nil
@@ -175,6 +177,7 @@ func migrationRunnerTask(app *App, args []string) error {
 func migrationRunnerTaskHelp(app *App) error {
 	fmt.Println("'migrate' task usage:")
 	fmt.Println()
+	fmt.Println("    list    shows all registered migrations")
 	fmt.Println("    up      runs the 'up' part for all pending migrations")
 	fmt.Println("    down    runs the 'down' part of the latest migration")
 	fmt.Println("    create  creates a new migration file in 'migrations/'")
@@ -182,7 +185,20 @@ func migrationRunnerTaskHelp(app *App) error {
 	return nil
 }
 
-func migrationRunnerTaskCreate(app *App) error {
+func migrationRunnerTaskList(app *App) error {
+	migrations := app.Migrations.migrations
+	sort.Slice(migrations, func(i, j int) bool {
+		return migrations[i].ID < migrations[i].ID
+	})
+	fmt.Println()
+	for _, migration := range migrations {
+		fmt.Println("    " + migration.ID)
+	}
+	fmt.Println()
+	return nil
+}
+
+func migrationRunnerTaskCreate(app *App, args []string) error {
 	if err := os.MkdirAll("migrations", os.ModePerm); err != nil {
 		return nil
 	}
@@ -216,7 +232,11 @@ func AddMigrationsToApp(app *weeb.App) {
 `))
 
 	migrationID := time.Now().UTC().Format("20060102150405")
-	migrationFileName := migrationID + ".go"
+	migrationName := migrationID
+	if len(args) >= 1 {
+		migrationName += "_" + ToSnakeCase(args[0])
+	}
+	migrationFileName := migrationName + ".go"
 	migrationFile, err := os.OpenFile(filepath.Join("migrations", migrationFileName), os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		return err
@@ -241,7 +261,7 @@ func down%v(app *weeb.App) error {
 	DROP TABLE ...
 	`+"`"+`)
 }
-`, migrationID, migrationID, migrationID, migrationID, migrationID)))
+`, migrationName, migrationID, migrationID, migrationID, migrationID)))
 
 	fmt.Printf("\nCreated migration file 'migrations/%s'\n\n", migrationFileName)
 

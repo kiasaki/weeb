@@ -2,18 +2,17 @@ package weeb
 
 import (
 	"database/sql"
+	"database/sql/driver"
 
-	// Import postgres db drivers here
-	_ "github.com/lib/pq"
+	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 )
 
 // DB
 type DB interface {
 	Connect() error
 	QueryOne(interface{}, string, ...interface{}) error
-	Query([]interface{}, string, ...interface{}) error
-	QueryRow([]interface{}, string, ...interface{}) error
-	QueryRows(string, ...interface{}) (*sql.Rows, error)
+	QueryAll(interface{}, string, ...interface{}) error
 	Exec(string, ...interface{}) error
 	ExecWithResult(string, ...interface{}) (sql.Result, error)
 }
@@ -21,7 +20,7 @@ type DB interface {
 // PostgresDB
 type PostgresDB struct {
 	dbURL  string
-	db     *sql.DB
+	db     *sqlx.DB
 	logger *Logger
 }
 
@@ -34,45 +33,28 @@ func (db *PostgresDB) Connect() error {
 		return nil
 	}
 
-	database, err := sql.Open("postgres", db.dbURL)
+	dataSourceName, err := pq.ParseURL(db.dbURL)
 	if err != nil {
 		return err
 	}
-	db.db = database
-	err = db.db.Ping()
-	if err != nil {
-		db.db.Close()
-		return err
-	}
-	return nil
+	db.db, err = sqlx.Connect("postgres", dataSourceName)
+	return err
 }
 
 func (db *PostgresDB) QueryOne(dest interface{}, query string, args ...interface{}) error {
-	destList := []interface{}{dest}
-	return db.Query(destList, query, args...)
-}
-
-func (db *PostgresDB) Query(dest []interface{}, query string, args ...interface{}) error {
 	if err := db.Connect(); err != nil {
 		return err
 	}
-
 	db.logger.Debug("sql", L{"query": query, "args": args})
-	rows, err := db.db.Query(query, args...)
-	if err != nil {
-		return nil
-	}
+	return db.db.Get(dest, query, args...)
+}
 
-	index := 0
-	for rows.Next() {
-		scan(dest[index], rows)
-		index++
+func (db *PostgresDB) QueryAll(dest interface{}, query string, args ...interface{}) error {
+	if err := db.Connect(); err != nil {
+		return err
 	}
-	if rows.Err() != nil {
-		return rows.Err()
-	}
-
-	return nil
+	db.logger.Debug("sql", L{"query": query, "args": args})
+	return db.db.Select(dest, query, args...)
 }
 
 func (db *PostgresDB) QueryRow(dest []interface{}, query string, args ...interface{}) error {
@@ -83,15 +65,6 @@ func (db *PostgresDB) QueryRow(dest []interface{}, query string, args ...interfa
 	db.logger.Debug("sql", L{"query": query, "args": args})
 	row := db.db.QueryRow(query, args...)
 	return row.Scan(dest...)
-}
-
-func (db *PostgresDB) QueryRows(query string, args ...interface{}) (*sql.Rows, error) {
-	if err := db.Connect(); err != nil {
-		return nil, err
-	}
-
-	db.logger.Debug("sql", L{"query": query, "args": args})
-	return db.db.Query(query, args...)
 }
 
 func (db *PostgresDB) Exec(query string, args ...interface{}) error {
@@ -106,4 +79,14 @@ func (db *PostgresDB) ExecWithResult(query string, args ...interface{}) (sql.Res
 
 	db.logger.Debug("sql", L{"query": query, "args": args})
 	return db.db.Exec(query, args...)
+}
+
+type DBStringArray []string
+
+func (s DBStringArray) Value() (driver.Value, error) {
+	return pq.Array(s).Value()
+}
+
+func (s DBStringArray) Scan(src interface{}) error {
+	return pq.Array(s).Scan(src)
 }

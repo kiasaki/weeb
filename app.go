@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/gorilla/securecookie"
 	"github.com/markbates/refresh/refresh"
 	refreshweb "github.com/markbates/refresh/refresh/web"
 )
@@ -28,6 +27,7 @@ type App struct {
 
 	Migrations *MigrationRunner
 	Tasks      *TaskRunner
+	Auth       *Auth
 }
 
 // NewApp create a new App instance
@@ -42,6 +42,9 @@ func NewApp() *App {
 	setupTemplates(app)
 	setupDatabase(app)
 	setupMigrations(app)
+	setupAuth(app)
+
+	addWeebMigrationsToApp(app)
 
 	return app
 }
@@ -60,7 +63,7 @@ func setupTasks(app *App) {
 	})
 
 	app.Tasks.Register("generate-session-key", func(app *App, _ []string) error {
-		fmt.Println(string(securecookie.GenerateRandomKey(64)))
+		fmt.Println(generateRandomKey(64))
 		return nil
 	})
 }
@@ -138,6 +141,10 @@ func setupMigrations(app *App) {
 	app.Migrations = NewMigrationRunner(app)
 
 	app.Tasks.Register("migrate", migrationRunnerTask)
+}
+
+func setupAuth(app *App) {
+	app.Auth = NewAuth(app)
 }
 
 // Start starts the application

@@ -12,16 +12,24 @@ type AuthUser interface {
 }
 
 type Auth struct {
-	ctx            *Context
+	app            *App
 	FindByID       func(ctx *Context, id string) (AuthUser, error)
 	FindByUsername func(ctx *Context, username string) (AuthUser, error)
 }
 
-func NewAuth(ctx *Context) *Auth {
+func NewAuth(app *App) *Auth {
 	return &Auth{
-		ctx:            ctx,
+		app:            app,
 		FindByID:       authDefaultFindByID,
 		FindByUsername: authDefaultFindByUsername,
+	}
+}
+
+func (a *Auth) RequireRoles(roles ...string) func(HandlerFunc) HandlerFunc {
+	return func(next HandlerFunc) HandlerFunc {
+		return func(ctx *Context) error {
+			return nil
+		}
 	}
 }
 
@@ -39,7 +47,7 @@ type User struct {
 	ID       string
 	Username string
 	Password string
-	Roles    []string
+	Roles    DBStringArray
 	Created  time.Time
 	Updated  time.Time
 }

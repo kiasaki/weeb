@@ -3,11 +3,12 @@ package weeb
 import (
 	"encoding/json"
 	"errors"
+	"time"
 )
 
 type Cache interface {
 	Get(key string, value interface{}) error
-	Set(key string, result interface{}) error
+	Set(key string, result interface{}, ttl time.Duration) error
 	Del(key string) error
 }
 
@@ -28,7 +29,7 @@ func (c *MemoryCache) Get(key string, result interface{}) error {
 		return json.Unmarshal(bytes, result)
 	}
 }
-func (c *MemoryCache) Set(key string, value interface{}) error {
+func (c *MemoryCache) Set(key string, value interface{}, ttl time.Duration) error {
 	if bytes, err := json.Marshal(value); err != nil {
 		return err
 	} else {

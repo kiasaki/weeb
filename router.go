@@ -9,12 +9,13 @@ import (
 type HandlerFunc func(*Context) error
 
 type Router struct {
-	app    *App
-	router *mux.Router
+	app           *App
+	router        *mux.Router
+	ErrorHandlers map[int]HandlerFunc
 }
 
 func NewRouter(app *App) *Router {
-	r := &Router{app: app, router: mux.NewRouter()}
+	r := &Router{app: app, router: mux.NewRouter(), ErrorHandlers: map[int]HandlerFunc{}}
 	r.Use(func(next HandlerFunc) HandlerFunc {
 		return func(ctx *Context) error {
 			if err := next(ctx); err != nil {
