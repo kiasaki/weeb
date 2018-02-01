@@ -1,10 +1,18 @@
 package weeb
 
 import (
+	"errors"
+	"strconv"
 	"time"
+
+	"github.com/lib/pq"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 var authUserKey contextKey = 1
+
+var ErrorPasswordsDontMatch = errors.New("Passwords don't match")
 
 type AuthUser interface {
 	AuthID() string
@@ -49,21 +57,75 @@ func (a *Auth) RequireRoles(roles ...string) func(HandlerFunc) HandlerFunc {
 	}
 }
 
+type AuthSigninInfo struct {
+	Username     string
+	Password     string
+	OnlyValidate bool
+}
+
+func (a *Auth) Signin(ctx *Context, info AuthSigninInfo) error {
+	user, err := a.FindByUsername(ctx, info.Username)
+	if err != nil {
+		return err
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(user.AuthPassword()), []byte(info.Password))
+	if err != nil {
+		return ErrorPasswordsDontMatch
+	}
+
+	if !info.OnlyValidate {
+		a.SigninUser(ctx, user)
+	}
+
+	return nil
+}
+
+func (a *Auth) SigninUser(ctx *Context, user AuthUser) {
+	ctx.Set("currentUser", user)
+	ctx.Session.Set("userID", user.AuthID())
+}
+
+func (a *Auth) Signout(ctx *Context) {
+	ctx.Session.Set("userID", "")
+}
+
+func (a *Auth) CreateUser(ctx *Context, user *User) error {
+	user.ID = ctx.ID.Next()
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
+	if err != nil {
+		return err
+	}
+	user.Password = string(hashedPassword)
+	if user.Roles == nil {
+		user.Roles = []string{"user"}
+	}
+	insertSQL := `INSERT INTO weeb_users (id, name, username, password, roles) VALUES (:id, :name, :username, :password, :roles)`
+	return ctx.DB.ExecNamed(insertSQL, user)
+}
+
 func (a *Auth) CurrentUser(ctx *Context) (AuthUser, error) {
 	if user, ok := ctx.Data["currentUser"]; ok {
 		return user.(AuthUser), nil
 	}
 
-	//userID := ctx.Session.Get("userId")
+	userID := ctx.Session.Get("userID")
+	if userID == "" {
+		return nil, nil
+	}
 
-	return nil, nil
+	user, err := a.FindByID(ctx, userID)
+	if err == nil && user != nil {
+		ctx.Set("currentUser", user)
+	}
+	return user, err
 }
 
 type User struct {
-	ID       string
+	ID       int64
+	Name     string
 	Username string
 	Password string
-	Roles    DBStringArray
+	Roles    pq.StringArray
 	Created  time.Time
 	Updated  time.Time
 }
@@ -73,7 +135,7 @@ func (u *User) Table() string {
 }
 
 func (u *User) AuthID() string {
-	return u.ID
+	return strconv.FormatInt(u.ID, 10)
 }
 
 func (u *User) AuthUsername() string {

@@ -16,6 +16,13 @@ type Router struct {
 
 func NewRouter(app *App) *Router {
 	r := &Router{app: app, router: mux.NewRouter(), ErrorHandlers: map[int]HandlerFunc{}}
+	r.init()
+	return r
+}
+
+func (r *Router) init() {
+	r.router.StrictSlash(true)
+	r.router.NotFoundHandler = http.HandlerFunc(r.handleNotFound)
 	r.Use(func(next HandlerFunc) HandlerFunc {
 		return func(ctx *Context) error {
 			if err := next(ctx); err != nil {
@@ -27,12 +34,24 @@ func NewRouter(app *App) *Router {
 			return nil
 		}
 	})
-	return r
+}
+
+func (r *Router) handleNotFound(w http.ResponseWriter, req *http.Request) {
+	ctx := r.requestContext(w, req)
+	ctx.Error(404, "Not found")
+	ctx.finalizeResponse()
 }
 
 func (r *Router) Group(prefix string) *Router {
-	subRouter := r.router.PathPrefix(prefix).Subrouter()
-	return &Router{app: r.app, router: subRouter}
+	if prefix == "" {
+		panic("Router: prefix can't be empty, it would catch all requests")
+	}
+	muxRouter := mux.NewRouter()
+	r.router.PathPrefix(prefix).Handler(muxRouter)
+	muxSubRouter := muxRouter.PathPrefix(prefix).Subrouter()
+	newRouter := &Router{app: r.app, router: muxSubRouter, ErrorHandlers: r.ErrorHandlers}
+	newRouter.init()
+	return newRouter
 }
 
 func (r *Router) UseHTTP(middleware func(http.Handler) http.Handler) {

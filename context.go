@@ -35,7 +35,7 @@ func NewContext(app *App, w http.ResponseWriter, r *http.Request) *Context {
 	ctx.Log = app.Log.WithContext(L{})
 	ctx.Session = NewSession(ctx)
 	ctx.Auth = app.Auth
-	ctx.ID = id.NewGen(0)
+	ctx.ID = app.ID
 
 	return ctx
 }
@@ -70,8 +70,25 @@ func (ctx *Context) Redirect(url string) error {
 }
 
 func (ctx *Context) RedirectWithCode(code int, url string) error {
-	http.Redirect(ctx.Response, ctx.Request, url, code)
+	ctx.SetHeader("Location", hexEscapeNonASCII(url))
+	ctx.SetStatusCode(code)
 	return nil
+}
+
+func (ctx *Context) Get(key string) interface{} {
+	return ctx.Data[key]
+}
+
+func (ctx *Context) Set(key string, value interface{}) {
+	ctx.Data[key] = value
+}
+
+func (ctx *Context) Param(key string, alt string) string {
+	value := ctx.Request.FormValue(key)
+	if value == "" {
+		return alt
+	}
+	return value
 }
 
 func (ctx *Context) SetHeader(name, value string) {

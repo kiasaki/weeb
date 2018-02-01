@@ -1,5 +1,93 @@
 {{ template "_header" . }}
 
-<h3 class="title">{{ .message }}</h3>
+<section class="hero is-info is-medium is-bold">
+  <div class="hero-head">
+    <nav class="navbar">
+      <div class="container">
+        <div class="navbar-brand">
+          <a class="navbar-item is-size-4 has-text-weight-light">Some Company</a>
+          <span class="navbar-burger burger" data-target="navbarMenu">
+            <span></span><span></span><span></span>
+          </span>
+        </div>
+        <div id="navbarMenu" class="navbar-menu">
+          <div class="navbar-end level">
+            <a class="navbar-item" href="/about/">About Us</a>
+            <a class="navbar-item" href="/contact-us/">Contact Us</a>
+            <a class="navbar-item" href="/blog/">Blog</a>
+            {{if .isSignedIn}}
+              <div class="dropdown is-right level-item">
+                <div class="dropdown-trigger">
+                  <a class="navbar-item">
+                    user@gmail.com &nbsp;
+                    <span class="icon is-small">
+                      <i class="fas fa-angle-down" aria-hidden="true"></i>
+                    </span>
+                  </a>
+                </div>
+                <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                  <div class="dropdown-content">
+                    <a href="/signout/" class="dropdown-item">
+                      Logout
+                    </a>
+                  </div>
+                </div>
+              </div>
+            {{else}}
+              <div class="navbar-item">
+                <div class="field is-grouped">
+                  <p class="control">
+                    <a class="button is-info" href="/signup/">
+                      Sign up
+                    </a>
+                  </p>
+                </div>
+              </div>
+            {{end}}
+          </div>
+        </div>
+      </div>
+    </nav>
+  </div>
+  <div class="hero-body">
+    <div class="container has-text-centered">
+      <h1 class="title">
+        The new standard in &lt;insert industry here&gt;
+      </h1>
+      <h2 class="subtitle">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do.
+      </h2>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      a
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content level">
+      <div class="level-left">
+        <p>
+          &copy; 2018 Some Company <em>—</em> All Rights Reserved.
+        </p>
+      </div>
+      <div class="level-right">
+        <a href="/">Homepage</a>
+        <em>&nbsp;·&nbsp;</em>
+        <a href="/about/">About Us</a>
+        <em>&nbsp;·&nbsp;</em>
+        <a href="/contact-us/">Contact Us</a>
+        <em>&nbsp;·&nbsp;</em>
+        <a href="/blog/">Blog</a>
+      </div>
+    </div>
+  </div>
+</div>
 
 {{ template "_footer" . }}

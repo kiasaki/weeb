@@ -10,9 +10,13 @@ func loggingMiddleware(next HandlerFunc) HandlerFunc {
 		if err := next(ctx); err != nil {
 			return err
 		}
+		code := ctx.Response.(*responseWriterWithStatusCode).statusCode
+		if code == 0 {
+			code = ctx.StatusCode()
+		}
 		ctx.Log.Info(ctx.Request.URL.Path, L{
 			"method": ctx.Request.Method,
-			"code":   ctx.StatusCode(),
+			"code":   code,
 			"ms":     time.Now().Unix() - start.Unix(),
 		})
 		return nil

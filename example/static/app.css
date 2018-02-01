@@ -1,6 +1,66 @@
 /*! minireset.css v0.0.3 | MIT License | github.com/jgthms/minireset.css */html,body,p,ol,ul,li,dl,dt,dd,blockquote,figure,fieldset,legend,textarea,pre,iframe,hr,h1,h2,h3,h4,h5,h6{margin:0;padding:0}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal}ul{list-style:none}button,input,select,textarea{margin:0}html{box-sizing:border-box}*,*:before,*:after{box-sizing:inherit}img,embed,iframe,object,audio,video{height:auto;max-width:100%}iframe{border:0}table{border-collapse:collapse;border-spacing:0}td,th{padding:0;text-align:left}
 
+/*
+ * Black  #000000
+ * Dark   #2D2C2C
+ * White  #FFFFFF
+ * Gray   #F9F9FA
+ * Grayer #F3F3F3
+ * Blue   #549AE6
+ * Bluer  #3678BD
+ * Dark Blue    #224875
+ * Darker Blue  #1B2E5A
+ * Pastel Green #61FFBB
+ */
+
 html, body {
   font-family: sans-serif;
   font-size: 16px;
+  background-color: #000;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.hero.is-light {
+  background-color: #F2F6FA;
+}
+
+.hero.is-info.is-bold {
+  background-image: linear-gradient(141deg,#224875 0,#61FFBB 100%);
+  /*background-image: linear-gradient(141deg,#224875 0,#1B2E5A 100%);*/
+}
+
+.hero.is-info .navbar-link.is-active,
+.hero.is-info .navbar-link:hover,
+.hero.is-info a.navbar-item.is-active,
+.hero.is-info a.navbar-item:hover {
+  background-color: rgba(255, 255, 255, 0.33);
+  color: #fff;
+}
+
+.button.is-primary {
+  background-color: #61FFBB;
+  border-color: transparent;
+  color: #fff;
+}
+
+.button.is-info {
+  background-color: #224875;
+  border-color: transparent;
+  color: #fff;
+}
+
+.section {
+  background: #fff;
+}
+
+.footer {
+  background: #000;
+  color: #fff;
+}
+.footer a {
+  color: #fff;
+  font-weight: bold;
 }

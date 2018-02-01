@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/kiasaki/weeb/id"
 	"github.com/markbates/refresh/refresh"
 	refreshweb "github.com/markbates/refresh/refresh/web"
 )
@@ -28,6 +29,7 @@ type App struct {
 	Migrations *MigrationRunner
 	Tasks      *TaskRunner
 	Auth       *Auth
+	ID         *id.Gen
 }
 
 // NewApp create a new App instance
@@ -43,6 +45,7 @@ func NewApp() *App {
 	setupDatabase(app)
 	setupMigrations(app)
 	setupAuth(app)
+	setupID(app)
 
 	addWeebMigrationsToApp(app)
 
@@ -53,6 +56,9 @@ func setupTasks(app *App) {
 	app.Tasks = NewTaskRunner(app)
 
 	app.Tasks.Register("start", func(app *App, _ []string) error {
+		// TODO avoid setting global, the real fix is for the task runner
+		// to set a local log level
+		SetGlobalLogLevel(LogLevelDebug)
 		app.Start()
 		return nil
 	})
@@ -145,6 +151,17 @@ func setupMigrations(app *App) {
 
 func setupAuth(app *App) {
 	app.Auth = NewAuth(app)
+	app.Router.Use(func(next HandlerFunc) HandlerFunc {
+		return func(ctx *Context) error {
+			ctx.Set("currentUserID", ctx.Session.Get("userID"))
+			ctx.Set("isSignedIn", ctx.Session.Get("userID") != "")
+			return next(ctx)
+		}
+	})
+}
+
+func setupID(app *App) {
+	app.ID = id.NewGen(0)
 }
 
 // Start starts the application

@@ -50,15 +50,15 @@ func (m *MigrationRunner) currentMigrationIndex() (int, error) {
 		return 0, err
 	}
 
-	lastMigration := struct{ id string }{""}
+	lastMigrationID := ""
 	lastMigrationSQL := `SELECT id FROM migrations ORDER BY id DESC LIMIT 1`
-	err := m.app.DB.QueryOne(&lastMigration, lastMigrationSQL)
+	err := m.app.DB.QueryOne(&lastMigrationID, lastMigrationSQL)
 	if err != nil && err != sql.ErrNoRows {
 		return 0, err
 	}
 
-	if lastMigration.id == "" {
-		return 0, nil
+	if lastMigrationID == "" {
+		return -1, nil
 	}
 
 	sort.Slice(m.migrations, func(i, j int) bool {
@@ -67,7 +67,7 @@ func (m *MigrationRunner) currentMigrationIndex() (int, error) {
 
 	currentIndex := 0
 	for i, m := range m.migrations {
-		if m.ID > lastMigration.id {
+		if m.ID > lastMigrationID {
 			break
 		}
 		currentIndex = i

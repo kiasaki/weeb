@@ -47,19 +47,33 @@ func (s *Session) save() {
 	if s.store == nil {
 		return
 	}
-	s.GetSession().Save(s.ctx.Request, s.ctx.Response)
+	err := s.GetSession().Save(s.ctx.Request, s.ctx.Response)
+	if err != nil {
+		s.ctx.Log.Error("error saving session", L{"err": err})
+	}
 }
 
 func (s *Session) GetSession() *sessions.Session {
 	s.ensureStore()
 	sessionName := s.ctx.App().Config.Get("name", "_app_session")
-	session, _ := s.store.Get(s.ctx.Request, sessionName)
+	session, err := s.store.Get(s.ctx.Request, sessionName)
+	if err != nil {
+		s.ctx.Log.Error("error parsing session", L{"err": err})
+	}
+	session.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   86400 * 7,
+		HttpOnly: true,
+	}
 	return session
 }
 
 func (s *Session) Get(key string) string {
 	session := s.GetSession()
-	return session.Values[key].(string)
+	if value, ok := session.Values[key]; ok {
+		return value.(string)
+	}
+	return ""
 }
 
 func (s *Session) Set(key, value string) {

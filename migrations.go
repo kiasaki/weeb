@@ -7,11 +7,12 @@ func addWeebMigrationsToApp(app *App) {
 func migrate0001UsersTableUp(app *App) error {
 	return app.DB.Exec(`CREATE TABLE weeb_users (
 	  id bigint PRIMARY KEY,
+	  name text NOT NULL,
 	  username text NOT NULL,
 	  password text NOT NULL,
 	  roles text[] NOT NULL,
-	  created timestamp NOT NULL without time zone default (now() at time zone 'utc'),
-	  updated timestamp NOT NULL without time zone default (now() at time zone 'utc'),
+	  created timestamp NOT NULL DEFAULT (NOW() at time zone 'utc'),
+	  updated timestamp NOT NULL DEFAULT (NOW() at time zone 'utc')
 	)`)
 }
 
