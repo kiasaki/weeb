@@ -2,10 +2,6 @@ package weeb
 
 import (
 	"errors"
-	"strconv"
-	"time"
-
-	"github.com/lib/pq"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -19,6 +15,12 @@ type AuthUser interface {
 	AuthUsername() string
 	AuthPassword() string
 	AuthRoles() []string
+}
+
+type AuthSigninInfo struct {
+	Username     string
+	Password     string
+	OnlyValidate bool
 }
 
 type Auth struct {
@@ -57,12 +59,6 @@ func (a *Auth) RequireRoles(roles ...string) func(HandlerFunc) HandlerFunc {
 	}
 }
 
-type AuthSigninInfo struct {
-	Username     string
-	Password     string
-	OnlyValidate bool
-}
-
 func (a *Auth) Signin(ctx *Context, info AuthSigninInfo) error {
 	user, err := a.FindByUsername(ctx, info.Username)
 	if err != nil {
@@ -89,20 +85,6 @@ func (a *Auth) Signout(ctx *Context) {
 	ctx.Session.Set("userID", "")
 }
 
-func (a *Auth) CreateUser(ctx *Context, user *User) error {
-	user.ID = ctx.ID.Next()
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
-	if err != nil {
-		return err
-	}
-	user.Password = string(hashedPassword)
-	if user.Roles == nil {
-		user.Roles = []string{"user"}
-	}
-	insertSQL := `INSERT INTO weeb_users (id, name, username, password, roles) VALUES (:id, :name, :username, :password, :roles)`
-	return ctx.DB.ExecNamed(insertSQL, user)
-}
-
 func (a *Auth) CurrentUser(ctx *Context) (AuthUser, error) {
 	if user, ok := ctx.Data["currentUser"]; ok {
 		return user.(AuthUser), nil
@@ -120,44 +102,10 @@ func (a *Auth) CurrentUser(ctx *Context) (AuthUser, error) {
 	return user, err
 }
 
-type User struct {
-	ID       int64
-	Name     string
-	Username string
-	Password string
-	Roles    pq.StringArray
-	Created  time.Time
-	Updated  time.Time
-}
-
-func (u *User) Table() string {
-	return "weeb_users"
-}
-
-func (u *User) AuthID() string {
-	return strconv.FormatInt(u.ID, 10)
-}
-
-func (u *User) AuthUsername() string {
-	return u.Username
-}
-
-func (u *User) AuthPassword() string {
-	return u.Password
-}
-
-func (u *User) AuthRoles() []string {
-	return u.Roles
-}
-
 func authDefaultFindByID(ctx *Context, id string) (AuthUser, error) {
-	var user User
-	err := ctx.DB.QueryOne(&user, "SELECT * FROM weeb_users WHERE id = $1", id)
-	return &user, err
+	panic("Auth: FindByID was not configured")
 }
 
 func authDefaultFindByUsername(ctx *Context, id string) (AuthUser, error) {
-	var user User
-	err := ctx.DB.QueryOne(&user, "SELECT * FROM weeb_users WHERE username = $1", id)
-	return &user, err
+	panic("Auth: FindByUsername was not configured")
 }
