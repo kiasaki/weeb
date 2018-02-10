@@ -62,7 +62,7 @@ func (m *MigrationRunner) currentMigrationIndex() (int, error) {
 	}
 
 	sort.Slice(m.migrations, func(i, j int) bool {
-		return m.migrations[i].ID < m.migrations[i].ID
+		return m.migrations[i].ID < m.migrations[j].ID
 	})
 
 	currentIndex := 0
@@ -188,7 +188,7 @@ func migrationRunnerTaskHelp(app *App) error {
 func migrationRunnerTaskList(app *App) error {
 	migrations := app.Migrations.migrations
 	sort.Slice(migrations, func(i, j int) bool {
-		return migrations[i].ID < migrations[i].ID
+		return migrations[i].ID < migrations[j].ID
 	})
 	fmt.Println()
 	for _, migration := range migrations {

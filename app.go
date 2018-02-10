@@ -25,6 +25,7 @@ type App struct {
 
 	Cache Cache
 	DB    DB
+	Mail  Mailer
 
 	Migrations *MigrationRunner
 	Tasks      *TaskRunner
@@ -43,6 +44,7 @@ func NewApp() *App {
 	setupRouter(app)
 	setupTemplates(app)
 	setupDatabase(app)
+	setupMailer(app)
 	setupMigrations(app)
 	setupAuth(app)
 	setupID(app)
@@ -117,6 +119,13 @@ func setupRouter(app *App) {
 	}
 
 	app.Router.Static("/static/", "static")
+
+	app.Router.Use(func(next HandlerFunc) HandlerFunc {
+		return func(ctx *Context) error {
+			ctx.Set("config", ctx.app.Config.values)
+			return next(ctx)
+		}
+	})
 }
 
 func setupTemplates(app *App) {
@@ -141,6 +150,18 @@ func setupTemplates(app *App) {
 func setupDatabase(app *App) {
 	dbURL := app.Config.Get("databaseUrl", "postgres://postgres:postgres@localhost:5432/app?sslmode=disable")
 	app.DB = NewPostgresDB(dbURL, app.Log)
+}
+
+func setupMailer(app *App) {
+	mailType := app.Config.Get("mailType", "console")
+	switch mailType {
+	case "console":
+		app.Mail = NewMailerConsole(app.Log)
+	case "smtp":
+		app.Mail = NewMailerSMTP(app.Log, app.Config)
+	default:
+		panic("unknown mailer type: " + mailType)
+	}
 }
 
 func setupMigrations(app *App) {
@@ -178,7 +199,7 @@ func (app *App) Start() {
 	go func() {
 		app.Log.Info("started", L{"port": port})
 		if err := server.ListenAndServe(); err != nil {
-			app.Log.Fatal("failed to start", L{})
+			app.Log.Fatal("failed to start", L{"err": err.Error()})
 			os.Exit(1)
 		}
 	}()

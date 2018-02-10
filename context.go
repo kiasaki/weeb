@@ -1,6 +1,7 @@
 package weeb
 
 import (
+	"bytes"
 	"context"
 	"net/http"
 
@@ -22,6 +23,7 @@ type Context struct {
 	Session *Session
 	Auth    *Auth
 	ID      *id.Gen
+	Mail    Mailer
 }
 
 func NewContext(app *App, w http.ResponseWriter, r *http.Request) *Context {
@@ -36,6 +38,7 @@ func NewContext(app *App, w http.ResponseWriter, r *http.Request) *Context {
 	ctx.Session = NewSession(ctx)
 	ctx.Auth = app.Auth
 	ctx.ID = app.ID
+	ctx.Mail = app.Mail
 
 	return ctx
 }
@@ -111,4 +114,18 @@ func (ctx *Context) finalizeResponse() {
 	ctx.Session.save()
 	ctx.Response.WriteHeader(ctx.statusCode)
 	ctx.Response.Write([]byte(ctx.body))
+}
+
+func (ctx *Context) Template(template string, value J) (string, error) {
+	data := J{}
+	for k, v := range ctx.Data {
+		data[k] = v
+	}
+	for k, v := range value {
+		data[k] = v
+	}
+
+	var b bytes.Buffer
+	err := ctx.app.templates.ExecuteTemplate(&b, template, data)
+	return b.String(), err
 }

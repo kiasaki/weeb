@@ -40,11 +40,11 @@ func (ctx *Context) HTML(code int, template string, value J) error {
 	}
 
 	var b bytes.Buffer
-	err := ctx.app.templates.ExecuteTemplate(&b, template, value)
+	err := ctx.app.templates.ExecuteTemplate(&b, template, data)
 	if err != nil {
 		message := "error executing template"
 		ctx.Log.Error(message, L{"template": template, "value": value, "err": err.Error()})
-		ctx.Text(500, message)
+		ctx.Error(500, message)
 		return nil
 	}
 
