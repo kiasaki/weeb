@@ -21,6 +21,7 @@ type Context struct {
 	DB      DB
 	Log     *Logger
 	Session *Session
+	Config  *Config
 	Auth    *Auth
 	ID      *id.Gen
 	Mail    Mailer
@@ -36,6 +37,7 @@ func NewContext(app *App, w http.ResponseWriter, r *http.Request) *Context {
 	ctx.DB = app.DB
 	ctx.Log = app.Log.WithContext(L{})
 	ctx.Session = NewSession(ctx)
+	ctx.Config = app.Config
 	ctx.Auth = app.Auth
 	ctx.ID = app.ID
 	ctx.Mail = app.Mail
@@ -47,12 +49,13 @@ func (ctx *Context) App() *App {
 	return ctx.app
 }
 
-func (ctx *Context) HandleError(err error) {
+func (ctx *Context) HandleError(err error) error {
 	if err == nil {
-		return
+		return nil
 	}
 	ctx.Log.Error("request error", L{"err": err.Error()})
 	ctx.Error(500, "internal server error")
+	return nil
 }
 
 func (ctx *Context) Error(code int, message string) error {
