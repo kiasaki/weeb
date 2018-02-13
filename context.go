@@ -1,7 +1,6 @@
 package weeb
 
 import (
-	"bytes"
 	"context"
 	"net/http"
 
@@ -119,7 +118,7 @@ func (ctx *Context) finalizeResponse() {
 	ctx.Response.Write([]byte(ctx.body))
 }
 
-func (ctx *Context) Template(template string, value J) (string, error) {
+func (ctx *Context) Template(name string, value J) (string, error) {
 	data := J{}
 	for k, v := range ctx.Data {
 		data[k] = v
@@ -127,8 +126,5 @@ func (ctx *Context) Template(template string, value J) (string, error) {
 	for k, v := range value {
 		data[k] = v
 	}
-
-	var b bytes.Buffer
-	err := ctx.app.templates.ExecuteTemplate(&b, template, data)
-	return b.String(), err
+	return ctx.app.Templates.Render(name, data)
 }

@@ -1,7 +1,6 @@
 package weeb
 
 import (
-	"bytes"
 	"encoding/json"
 )
 
@@ -31,16 +30,7 @@ func (ctx *Context) JSON(code int, value interface{}) error {
 
 // HTML sends a rendered template back as html
 func (ctx *Context) HTML(code int, template string, value J) error {
-	data := J{}
-	for k, v := range ctx.Data {
-		data[k] = v
-	}
-	for k, v := range value {
-		data[k] = v
-	}
-
-	var b bytes.Buffer
-	err := ctx.app.templates.ExecuteTemplate(&b, template, data)
+	contents, err := ctx.Template(template, value)
 	if err != nil {
 		message := "error executing template"
 		ctx.Log.Error(message, L{"template": template, "value": value, "err": err.Error()})
@@ -50,7 +40,7 @@ func (ctx *Context) HTML(code int, template string, value J) error {
 
 	ctx.SetHeader("Content-Type", "text/html; charset=utf-8")
 	ctx.SetStatusCode(code)
-	ctx.SetBody(b.String())
+	ctx.SetBody(contents)
 	return nil
 }
 

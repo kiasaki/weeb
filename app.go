@@ -21,7 +21,7 @@ type App struct {
 	Config    *Config
 	Router    *Router
 	Session   *Session
-	templates *template.Template
+	Templates Templates
 
 	Cache Cache
 	DB    DB
@@ -129,22 +129,21 @@ func setupRouter(app *App) {
 }
 
 func setupTemplates(app *App) {
+	templates := template.New("weeb")
 	if dirExists("templates") {
 		var err error
-		app.templates, err = template.ParseGlob("templates/*")
+		templates, err = template.ParseGlob("templates/*")
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		for _, t := range app.templates.Templates() {
+		for _, t := range templates.Templates() {
 			name := t.Name()
 			ext := filepath.Ext(name)
-			app.templates, _ = app.templates.AddParseTree(name[:len(name)-len(ext)], t.Tree)
+			templates, _ = templates.AddParseTree(name[:len(name)-len(ext)], t.Tree)
 		}
-	} else {
-		// Make sure tempaltes is a valid instance of *tempalte.Template
-		app.templates = template.New("weeb")
 	}
+	app.Templates = NewTemplatesGo(templates)
 }
 
 func setupDatabase(app *App) {

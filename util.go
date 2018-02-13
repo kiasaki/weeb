@@ -125,6 +125,16 @@ func containsString(values []string, search string) bool {
 	return false
 }
 
+// OrString returns the first non-empty string
+func OrString(options ...string) string {
+	for _, o := range options {
+		if len(o) > 0 {
+			return o
+		}
+	}
+	return ""
+}
+
 const randomKeyDict = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
 func generateRandomKey(length int) string {
