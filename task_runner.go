@@ -1,6 +1,9 @@
 package weeb
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 // TaskFn represents a task's implementation function
 type TaskFn func(app *App, args []string) error
@@ -18,9 +21,15 @@ func NewTaskRunner(app *App) *TaskRunner {
 	tasks := &TaskRunner{app: app, tasks: map[string]TaskFn{}}
 
 	tasks.Register("help", func(app *App, args []string) error {
+		taskNames := []string{}
+		for taskName := range tasks.tasks {
+			taskNames = append(taskNames, taskName)
+		}
+		sort.Strings(taskNames)
+
 		fmt.Println("Available commands:")
 		fmt.Println()
-		for taskName := range tasks.tasks {
+		for _, taskName := range taskNames {
 			fmt.Println("    " + taskName)
 		}
 		fmt.Println()
