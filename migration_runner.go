@@ -88,6 +88,10 @@ func (m *MigrationRunner) RunUp(n int) error {
 		return nil
 	}
 
+	sort.Slice(m.migrations, func(i, j int) bool {
+		return m.migrations[i].ID < m.migrations[j].ID
+	})
+
 	fmt.Println()
 
 	targetIndex := len(m.migrations)
@@ -137,6 +141,10 @@ func (m *MigrationRunner) RunDown(n int) error {
 	if n != 1 {
 		return errors.New("RunDown does not support an 'n' value other than '1'")
 	}
+
+	sort.Slice(m.migrations, func(i, j int) bool {
+		return m.migrations[i].ID < m.migrations[j].ID
+	})
 
 	fmt.Println()
 	migration := m.migrations[currentMigrationIndex]
