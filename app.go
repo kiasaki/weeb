@@ -31,6 +31,7 @@ type App struct {
 	Tasks      *TaskRunner
 	Auth       *Auth
 	ID         *id.Gen
+	Container  *Container
 }
 
 // NewApp create a new App instance
@@ -48,6 +49,7 @@ func NewApp() *App {
 	setupMigrations(app)
 	setupAuth(app)
 	setupID(app)
+	setupContainer(app)
 
 	addWeebMigrationsToApp(app)
 
@@ -182,6 +184,10 @@ func setupAuth(app *App) {
 
 func setupID(app *App) {
 	app.ID = id.NewGen(0)
+}
+
+func setupContainer(app *App) {
+	app.Container = NewContainer()
 }
 
 // Start starts the application

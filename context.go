@@ -26,11 +26,17 @@ type Context struct {
 	Mail    Mailer
 }
 
-func NewContext(app *App, w http.ResponseWriter, r *http.Request) *Context {
-	ctx := &Context{app: app, statusCode: 200}
+func NewHTTPContext(app *App, w http.ResponseWriter, r *http.Request) *Context {
+	ctx := NewContext(app)
 
 	ctx.Request = r.WithContext(context.WithValue(r.Context(), requestContextKey, ctx))
 	ctx.Response = w
+
+	return ctx
+}
+
+func NewContext(app *App) *Context {
+	ctx := &Context{app: app, statusCode: 200}
 
 	ctx.Data = J{}
 	ctx.DB = app.DB

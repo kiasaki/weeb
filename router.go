@@ -130,5 +130,5 @@ func (r *Router) requestContext(w http.ResponseWriter, req *http.Request) *Conte
 	if ok {
 		return ctx
 	}
-	return NewContext(r.app, &responseWriterWithStatusCode{w, 0}, req)
+	return NewHTTPContext(r.app, &responseWriterWithStatusCode{w, 0}, req)
 }
