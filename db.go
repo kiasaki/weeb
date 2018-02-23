@@ -10,6 +10,7 @@ import (
 // DB
 type DB interface {
 	Connect() error
+	Query(string, ...interface{}) (*sql.Rows, error)
 	QueryOne(interface{}, string, ...interface{}) error
 	QueryAll(interface{}, string, ...interface{}) error
 	Exec(string, ...interface{}) error
@@ -39,6 +40,14 @@ func (db *PostgresDB) Connect() error {
 	}
 	db.db, err = sqlx.Connect("postgres", dataSourceName)
 	return err
+}
+
+func (db *PostgresDB) Query(query string, args ...interface{}) (*sql.Rows, error) {
+	if err := db.Connect(); err != nil {
+		return nil, err
+	}
+	db.logger.Debug("sql", L{"query": query, "args": args})
+	return db.db.Query(query, args...)
 }
 
 func (db *PostgresDB) QueryOne(dest interface{}, query string, args ...interface{}) error {
