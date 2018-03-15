@@ -116,6 +116,17 @@ func displayMap(valuesMap map[string]string, leftPadding, keyPadding int) string
 	return out
 }
 
+func mergeStringMaps(a, b map[string]string) map[string]string {
+	c := map[string]string{}
+	for k, v := range a {
+		c[k] = v
+	}
+	for k, v := range b {
+		c[k] = v
+	}
+	return c
+}
+
 func containsString(values []string, search string) bool {
 	for _, value := range values {
 		if value == search {

@@ -2,9 +2,13 @@ package weeb
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/kiasaki/weeb/id"
+	"github.com/mitchellh/mapstructure"
 )
 
 var requestContextKey contextKey = 0
@@ -97,6 +101,10 @@ func (ctx *Context) Set(key string, value interface{}) {
 }
 
 func (ctx *Context) Param(key string, alt string) string {
+	urlVars := ctx.Data["vars"].(map[string]string)
+	if value, ok := urlVars[key]; ok {
+		return value
+	}
 	value := ctx.Request.FormValue(key)
 	if value == "" {
 		return alt
@@ -135,4 +143,25 @@ func (ctx *Context) Template(name string, value J) (string, error) {
 		data[k] = v
 	}
 	return ctx.app.Templates.Render(name, data)
+}
+
+// Bind parses the request body into a given entity
+func (ctx *Context) Bind(entity interface{}) error {
+	defer ctx.Request.Body.Close()
+	if strings.Contains(ctx.Request.Header.Get("Content-Type"), "application/x-www-form-urlencoded") {
+		formData := map[string]interface{}{}
+		err := ctx.Request.ParseForm()
+		if err != nil {
+			ctx.Log.Error("error parsing form", L{"err": err.Error()})
+		}
+
+		for key := range ctx.Request.Form {
+			formData[key] = ctx.Request.Form.Get(key)
+		}
+		return mapstructure.Decode(formData, entity)
+	} else if strings.Contains(ctx.Request.Header.Get("Content-Type"), "application/json") {
+		return json.NewDecoder(ctx.Request.Body).Decode(entity)
+	} else {
+		return errors.New("Unsupported Content-Type provided")
+	}
 }

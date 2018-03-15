@@ -127,8 +127,12 @@ func (w *responseWriterWithStatusCode) WriteHeader(code int) {
 
 func (r *Router) requestContext(w http.ResponseWriter, req *http.Request) *Context {
 	ctx, ok := req.Context().Value(requestContextKey).(*Context)
-	if ok {
-		return ctx
+	if !ok {
+		ctx = NewHTTPContext(r.app, &responseWriterWithStatusCode{w, 0}, req)
 	}
-	return NewHTTPContext(r.app, &responseWriterWithStatusCode{w, 0}, req)
+	if _, ok := ctx.Data["vars"]; !ok {
+		ctx.Data["vars"] = map[string]string{}
+	}
+	ctx.Data["vars"] = mergeStringMaps(ctx.Data["vars"].(map[string]string), mux.Vars(req))
+	return ctx
 }

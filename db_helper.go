@@ -33,3 +33,65 @@ func (h *DBHelper) Insert(e Entity) error {
 	insertSQL = fmt.Sprintf(insertSQL, e.Table(), fields, placeholders)
 	return h.db.ExecNamed(insertSQL, e)
 }
+
+// FindParams specifies what exatly it is we want to find
+type FindParams struct {
+	Limit   int64
+	OrderBy []string
+	Where   map[string]interface{}
+}
+
+func (h *DBHelper) findSQLFor(e Entity, params FindParams) (string, []interface{}) {
+	sql := "SELECT %s FROM %s"
+	values := []interface{}{}
+	fields := strings.Join(e.Fields(), ", ")
+	sql = fmt.Sprintf(sql, fields, e.Table())
+
+	i := 1
+
+	if len(params.Where) > 0 {
+		whereSqls := []string{}
+		for whereField, whereValue := range params.Where {
+			whereSqls = append(whereSqls, fmt.Sprintf("%s = $%d", ToSnakeCase(whereField), i))
+			values = append(values, whereValue)
+			i++
+		}
+		if len(whereSqls) > 0 {
+			sql += " WHERE " + strings.Join(whereSqls, " AND ")
+		}
+	}
+	if len(params.OrderBy) > 0 {
+		for _, order := range params.OrderBy {
+			sql += fmt.Sprintf(" ORDER BY $%d", i)
+			i++
+			if order[0] == '-' {
+				order = order[1:]
+				sql += " DESC"
+			} else {
+				sql += " ASC"
+			}
+			values = append(values, ToSnakeCase(order))
+		}
+	}
+	if params.Limit > 0 {
+		sql += fmt.Sprintf(" LIMIT $%d", i)
+		i++
+		values = append(values, params.Limit)
+	}
+
+	return sql, values
+}
+
+// Find finds one entity in the database based on the provided filters,
+// limits and sort orders
+func (h *DBHelper) Find(e Entity, params FindParams) error {
+	sql, values := h.findSQLFor(e, params)
+	return h.db.QueryOne(e, sql, values...)
+}
+
+// FindAll finds all entities in the database that match the provided filters,
+// limits and sort orders
+func (h *DBHelper) FindAll(e Entity, result []interface{}, params FindParams) error {
+	sql, values := h.findSQLFor(e, params)
+	return h.db.QueryAll(result, sql, values...)
+}
