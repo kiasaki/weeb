@@ -23,9 +23,10 @@ type App struct {
 	Session   *Session
 	Templates Templates
 
-	Cache Cache
-	DB    DB
-	Mail  Mailer
+	Cache    Cache
+	DB       DB
+	DBHelper *DBHelper
+	Mail     Mailer
 
 	Migrations *MigrationRunner
 	Tasks      *TaskRunner
@@ -151,6 +152,7 @@ func setupTemplates(app *App) {
 func setupDatabase(app *App) {
 	dbURL := app.Config.Get("databaseUrl", "postgres://postgres:postgres@localhost:5432/app?sslmode=disable")
 	app.DB = NewPostgresDB(dbURL, app.Log)
+	app.DBHelper = NewDBHelper(app.DB)
 }
 
 func setupMailer(app *App) {

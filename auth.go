@@ -8,6 +8,7 @@ import (
 
 var authUserKey contextKey = 1
 
+var ErrorUserNotFound = errors.New("User not found")
 var ErrorPasswordsDontMatch = errors.New("Passwords don't match")
 
 type AuthUser interface {
@@ -63,6 +64,9 @@ func (a *Auth) Signin(ctx *Context, info AuthSigninInfo) error {
 	user, err := a.FindByUsername(ctx, info.Username)
 	if err != nil {
 		return err
+	}
+	if user == nil {
+		return ErrorUserNotFound
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.AuthPassword()), []byte(info.Password))
 	if err != nil {

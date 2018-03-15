@@ -16,14 +16,15 @@ type Context struct {
 	Request    *http.Request
 	Response   http.ResponseWriter
 
-	Data    J
-	DB      DB
-	Log     *Logger
-	Session *Session
-	Config  *Config
-	Auth    *Auth
-	ID      *id.Gen
-	Mail    Mailer
+	Data     J
+	DB       DB
+	DBHelper *DBHelper
+	Log      *Logger
+	Session  *Session
+	Config   *Config
+	Auth     *Auth
+	ID       *id.Gen
+	Mail     Mailer
 }
 
 func NewHTTPContext(app *App, w http.ResponseWriter, r *http.Request) *Context {
@@ -40,6 +41,7 @@ func NewContext(app *App) *Context {
 
 	ctx.Data = J{}
 	ctx.DB = app.DB
+	ctx.DBHelper = NewDBHelper(app.DB)
 	ctx.Log = app.Log.WithContext(L{})
 	ctx.Session = NewSession(ctx)
 	ctx.Config = app.Config

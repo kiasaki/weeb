@@ -125,6 +125,13 @@ func containsString(values []string, search string) bool {
 	return false
 }
 
+func title(value string) string {
+	if len(value) == 0 {
+		return value
+	}
+	return strings.ToUpper(string(value[0])) + value[1:]
+}
+
 // OrString returns the first non-empty string
 func OrString(options ...string) string {
 	for _, o := range options {
