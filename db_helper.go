@@ -91,7 +91,7 @@ func (h *DBHelper) Find(e Entity, params FindParams) error {
 
 // FindAll finds all entities in the database that match the provided filters,
 // limits and sort orders
-func (h *DBHelper) FindAll(e Entity, result []interface{}, params FindParams) error {
+func (h *DBHelper) FindAll(e Entity, result interface{}, params FindParams) error {
 	sql, values := h.findSQLFor(e, params)
 	return h.db.QueryAll(result, sql, values...)
 }
