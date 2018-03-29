@@ -34,6 +34,21 @@ func (h *DBHelper) Insert(e Entity) error {
 	return h.db.ExecNamed(insertSQL, e)
 }
 
+// Update updates given entity in the database
+func (h *DBHelper) Update(e Entity) error {
+	updateSQL := "UPDATE %s SET %s WHERE %s = :%s"
+	idField := e.Fields()[0]
+
+	fields := []string{}
+	for _, field := range e.Fields() {
+		fields = append(fields, fmt.Sprintf("%s = :%s", field, field))
+	}
+	fieldsSQL := strings.Join(fields, ", ")
+
+	updateSQL = fmt.Sprintf(updateSQL, e.Table(), fieldsSQL, idField, idField)
+	return h.db.ExecNamed(updateSQL, e)
+}
+
 // FindParams specifies what exatly it is we want to find
 type FindParams struct {
 	Limit   int64
