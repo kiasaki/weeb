@@ -132,21 +132,21 @@ func setupRouter(app *App) {
 }
 
 func setupTemplates(app *App) {
-	templates := template.New("weeb")
+	templates := NewTemplatesGo(template.New("weeb"))
 	if dirExists("templates") {
 		var err error
-		templates, err = template.ParseGlob("templates/*")
+		templatesOnDisk, err := templates.t.ParseGlob("templates/*")
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		for _, t := range templates.Templates() {
+		for _, t := range templatesOnDisk.Templates() {
 			name := t.Name()
 			ext := filepath.Ext(name)
-			templates, _ = templates.AddParseTree(name[:len(name)-len(ext)], t.Tree)
+			templates.t, _ = templates.t.AddParseTree(name[:len(name)-len(ext)], t.Tree)
 		}
 	}
-	app.Templates = NewTemplatesGo(templates)
+	app.Templates = templates
 }
 
 func setupDatabase(app *App) {

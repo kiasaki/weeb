@@ -3,6 +3,7 @@ package weeb
 import (
 	"bytes"
 	"html/template"
+	"time"
 )
 
 type Templates interface {
@@ -11,26 +12,38 @@ type Templates interface {
 }
 
 type TemplatesGo struct {
-	templates *template.Template
+	t       *template.Template
+	funcMap template.FuncMap
 }
 
 var _ Templates = Templates(&TemplatesGo{})
 
 func NewTemplatesGo(templates *template.Template) *TemplatesGo {
-	return &TemplatesGo{templates: templates}
+	funcMap := template.FuncMap{
+		"date":        func(t time.Time) string { return t.Format("2006-01-02") },
+		"datetime":    func(t time.Time) string { return t.Format("2006-01-02 15:04") },
+		"datetimesec": func(t time.Time) string { return t.Format("2006-01-02 15:04:05") },
+	}
+	templates.Funcs(funcMap)
+	return &TemplatesGo{t: templates, funcMap: funcMap}
 }
 
 func (t *TemplatesGo) Render(name string, value J) (string, error) {
 	var b bytes.Buffer
-	err := t.templates.ExecuteTemplate(&b, name, value)
+	err := t.t.ExecuteTemplate(&b, name, value)
 	return b.String(), err
 }
 
 func (t *TemplatesGo) Add(name, contents string) error {
-	templates, err := t.templates.New(name).Parse(contents)
+	templates, err := t.t.New(name).Parse(contents)
 	if err != nil {
 		return err
 	}
-	t.templates = templates
+	t.t = templates
 	return nil
+}
+
+func (t *TemplatesGo) AddFunction(name string, fn interface{}) {
+	t.funcMap[name] = fn
+	t.t.Funcs(t.funcMap)
 }

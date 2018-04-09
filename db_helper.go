@@ -77,15 +77,14 @@ func (h *DBHelper) findSQLFor(e Entity, params FindParams) (string, []interface{
 	}
 	if len(params.OrderBy) > 0 {
 		for _, order := range params.OrderBy {
-			sql += fmt.Sprintf(" ORDER BY $%d", i)
-			i++
+			var modifier string
 			if order[0] == '-' {
 				order = order[1:]
-				sql += " DESC"
+				modifier = " DESC"
 			} else {
-				sql += " ASC"
+				modifier = " ASC"
 			}
-			values = append(values, ToSnakeCase(order))
+			sql += fmt.Sprintf(" ORDER BY %s %s", ToSnakeCase(order), modifier)
 		}
 	}
 	if params.Limit > 0 {
