@@ -6,6 +6,12 @@ import (
 	"time"
 )
 
+var TemplatesFunctionMap = template.FuncMap{
+	"date":        func(t time.Time) string { return t.Format("2006-01-02") },
+	"datetime":    func(t time.Time) string { return t.Format("2006-01-02 15:04") },
+	"datetimesec": func(t time.Time) string { return t.Format("2006-01-02 15:04:05") },
+}
+
 type Templates interface {
 	Render(name string, value J) (string, error)
 	Add(name, contents string) error
@@ -19,12 +25,7 @@ type TemplatesGo struct {
 var _ Templates = Templates(&TemplatesGo{})
 
 func NewTemplatesGo(templates *template.Template) *TemplatesGo {
-	funcMap := template.FuncMap{
-		"date":        func(t time.Time) string { return t.Format("2006-01-02") },
-		"datetime":    func(t time.Time) string { return t.Format("2006-01-02 15:04") },
-		"datetimesec": func(t time.Time) string { return t.Format("2006-01-02 15:04:05") },
-	}
-	templates.Funcs(funcMap)
+	templates.Funcs(TemplatesFunctionMap)
 	return &TemplatesGo{t: templates, funcMap: funcMap}
 }
 
