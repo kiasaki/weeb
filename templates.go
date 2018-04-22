@@ -25,8 +25,12 @@ type TemplatesGo struct {
 var _ Templates = Templates(&TemplatesGo{})
 
 func NewTemplatesGo(templates *template.Template) *TemplatesGo {
-	templates.Funcs(TemplatesFunctionMap)
-	return &TemplatesGo{t: templates, funcMap: funcMap}
+	t := &TemplatesGo{t: templates, funcMap: template.FuncMap{}}
+	for k, fn := range TemplatesFunctionMap {
+		t.funcMap[k] = fn
+	}
+	t.t.Funcs(t.funcMap)
+	return t
 }
 
 func (t *TemplatesGo) Render(name string, value J) (string, error) {
