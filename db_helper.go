@@ -51,9 +51,10 @@ func (h *DBHelper) Update(e Entity) error {
 
 // FindParams specifies what exatly it is we want to find
 type FindParams struct {
-	Limit   int64
-	OrderBy []string
-	Where   map[string]interface{}
+	Limit      int64
+	OrderBy    []string
+	OrderBySql string
+	Where      map[string]interface{}
 }
 
 func (h *DBHelper) findSQLFor(e Entity, params FindParams) (string, []interface{}) {
@@ -86,6 +87,8 @@ func (h *DBHelper) findSQLFor(e Entity, params FindParams) (string, []interface{
 			}
 			sql += fmt.Sprintf(" ORDER BY %s %s", ToSnakeCase(order), modifier)
 		}
+	} else if len(params.OrderBySql) > 0 {
+		sql += fmt.Sprintf(" ORDER BY %s", params.OrderBySql)
 	}
 	if params.Limit > 0 {
 		sql += fmt.Sprintf(" LIMIT $%d", i)
